@@ -15,13 +15,17 @@ LDFLAGS	= 	-T flash.ld \
 			-mcpu=cortex-m0
 
 SRC_N 	= 	reset_handler.c \
-			main.c
+			main.c \
+			gpio.c
+
+HEADERS_N =	gpio.h
 
 SRC_P 	= ./src/
 OBJ 	= $(addprefix $(OBJ_P),$(SRC_N:.c=.o))
 OBJ_P	= ./obj/
 INC 	= $(addprefix -I, $(INC_P))
 INC_P	= ./includes/
+HEADERS = $(addprefix $(INC_P), $(HEADERS_N))
 NAME 	= kernel.elf
 
 
@@ -30,7 +34,7 @@ all: obj $(NAME)
 obj:
 	mkdir -p $(OBJ_P)
 
-$(OBJ_P)%.o:$(SRC_P)%.c $(HEADER)
+$(OBJ_P)%.o: $(SRC_P)%.c $(HEADERS)
 	$(CC) $(CCFLAGS) -I $(INC_P) -o $@ -c $<
 
 $(NAME): $(OBJ)
@@ -41,6 +45,9 @@ clean:
 
 fclean: clean
 	rm -rf $(NAME)
+
+flash: all
+	openocd -f "board/st_nucleo_f0.cfg" -c "program kernel.elf"
 
 re: fclean all
 

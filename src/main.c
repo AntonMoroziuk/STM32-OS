@@ -1,17 +1,22 @@
 #include <stdint.h>
 
+#include "gpio.h"
+
 int main()
 {
 	volatile uint32_t *RCC_AHBENR = (uint32_t *)0x40021014;
 
 	*RCC_AHBENR |= (1 << 17);
 
-	volatile uint32_t *GPIOA = (uint32_t *)0x48000000UL;
+	GPIO_init_config PA5_config;
 
-	// configure PA5 as output
-	*GPIOA = 0x28000400;
+	PA5_config.pin = GPIO_PIN_5;
+	PA5_config.mode = GPIO_MODE_OUTPUT;
+	PA5_config.pull = GPIO_NO_PUPD;
+	PA5_config.speed = GPIO_SPEED_LOW;
 
-	*(GPIOA + 6) = (1 << 5);
+	init_gpio(GPIOA, &PA5_config);
+	set_gpio(GPIOA, (uint8_t)5, (uint8_t)1);
 
 	while (1) {}
 

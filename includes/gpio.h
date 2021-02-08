@@ -53,33 +53,32 @@ typedef struct 	GPIO_init_config_s
 #define GPIOF_BASE 					(0x48001400U)
 
 /* GPIO group object */
-#define GPIOA						(*GPIO_config)GPIOA_BASE
-#define GPIOB						(*GPIO_config)GPIOB_BASE
-#define GPIOC						(*GPIO_config)GPIOC_BASE
-#define GPIOD						(*GPIO_config)GPIOD_BASE
-#define GPIOE						(*GPIO_config)GPIOE_BASE
-#define GPIOF						(*GPIO_config)GPIOF_BASE
+#define GPIOA						(GPIO_config *)GPIOA_BASE
+#define GPIOB						(GPIO_config *)GPIOB_BASE
+#define GPIOC						(GPIO_config *)GPIOC_BASE
+#define GPIOD						(GPIO_config *)GPIOD_BASE
+#define GPIOE						(GPIO_config *)GPIOE_BASE
+#define GPIOF						(GPIO_config *)GPIOF_BASE
 
 /* GPIO pin offset inside group */
-#define GPIO_PIN_0					((uint16_t)0x0001U)
-#define GPIO_PIN_1					((uint16_t)0x0002U)
-#define GPIO_PIN_2					((uint16_t)0x0004U)
-#define GPIO_PIN_3					((uint16_t)0x0008U)
-#define GPIO_PIN_4					((uint16_t)0x0010U)
-#define GPIO_PIN_5					((uint16_t)0x0020U)
-#define GPIO_PIN_6					((uint16_t)0x0040U)
-#define GPIO_PIN_7					((uint16_t)0x0080U)
-#define GPIO_PIN_8					((uint16_t)0x0100U)
-#define GPIO_PIN_9					((uint16_t)0x0200U)
-#define GPIO_PIN_10					((uint16_t)0x0400U)
-#define GPIO_PIN_11					((uint16_t)0x0800U)
-#define GPIO_PIN_12					((uint16_t)0x1000U)
-#define GPIO_PIN_13					((uint16_t)0x2000U)
-#define GPIO_PIN_14					((uint16_t)0x4000U)
-#define GPIO_PIN_15					((uint16_t)0x8000U)
-#define GPIO_PIN_ALL				((uint16_t)0xFFFFU)
+#define GPIO_PIN_0					0x00000000U
+#define GPIO_PIN_1					0x00000001U
+#define GPIO_PIN_2					0x00000002U
+#define GPIO_PIN_3					0x00000003U
+#define GPIO_PIN_4					0x00000004U
+#define GPIO_PIN_5					0x00000005U
+#define GPIO_PIN_6					0x00000006U
+#define GPIO_PIN_7					0x00000007U
+#define GPIO_PIN_8					0x00000008U
+#define GPIO_PIN_9					0x00000009U
+#define GPIO_PIN_10					0x0000000aU
+#define GPIO_PIN_11					0x0000000bU
+#define GPIO_PIN_12					0x0000000cU
+#define GPIO_PIN_13					0x0000000dU
+#define GPIO_PIN_14					0x0000000eU
+#define GPIO_PIN_15					0x0000000fU
 
-
-void	configure_gpio(GPIO_config *GPIOx, GPIO_init_config *GPIO_init);
+void	init_gpio(GPIO_config *GPIOx, GPIO_init_config *GPIO_init);
+void	set_gpio(GPIO_config *GPIOx, uint8_t pin, uint8_t value);
 
 #endif
