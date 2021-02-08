@@ -1,5 +1,5 @@
 CC 		= arm-none-eabi-gcc
-CFLAGS	= 	-Wall \
+CCFLAGS	= 	-Wall \
 			-Werror \
 			-Wextra \
 			-mcpu=cortex-m0 \
@@ -31,7 +31,7 @@ obj:
 	mkdir -p $(OBJ_P)
 
 $(OBJ_P)%.o:$(SRC_P)%.c $(HEADER)
-	$(CC) $(CC_FLAGS) -I $(INC_P) -o $@ -c $<
+	$(CC) $(CCFLAGS) -I $(INC_P) -o $@ -c $<
 
 $(NAME): $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) -o $(NAME)

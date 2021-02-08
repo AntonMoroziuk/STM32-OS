@@ -1,3 +1,4 @@
+ENTRY(Reset_Handler)
 MEMORY
 {
   rom      (rx)  : ORIGIN = 0x08000000, LENGTH = 0x00040000
