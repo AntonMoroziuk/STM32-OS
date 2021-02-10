@@ -4,21 +4,21 @@
 
 int main()
 {
-	volatile uint32_t *RCC_AHBENR = (uint32_t *)0x40021014;
+    volatile uint32_t *RCC_AHBENR = (uint32_t *)0x40021014;
 
-	*RCC_AHBENR |= (1 << 17);
+    *RCC_AHBENR |= (1 << 17);
 
-	GPIO_init_config PA5_config;
+    GPIO_config PA5_config;
 
-	PA5_config.pin = GPIO_PIN_5;
-	PA5_config.mode = GPIO_MODE_OUTPUT;
-	PA5_config.pull = GPIO_NO_PUPD;
-	PA5_config.speed = GPIO_SPEED_LOW;
+    PA5_config.pin = GPIO_PIN_5;
+    PA5_config.mode = GPIO_MODE_OUTPUT;
+    PA5_config.pull = GPIO_NO_PUPD;
+    PA5_config.speed = GPIO_SPEED_LOW;
 
-	init_gpio(GPIOA, &PA5_config);
-	set_gpio(GPIOA, (uint8_t)5, (uint8_t)1);
+    gpio_init(GPIOA, &PA5_config);
+    gpio_set(GPIOA, (uint8_t)5, (uint8_t)1);
 
-	while (1) {}
+    while (1) {}
 
-	return (0);
+    return (0);
 }
