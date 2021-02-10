@@ -16,9 +16,13 @@ LDFLAGS	= 	-T flash.ld \
 
 SRC_N 	= 	reset_handler.c \
 			main.c \
-			gpio.c
+			gpio.c \
+			utils.c \
+			rcc.c
 
-HEADERS_N =	gpio.h
+HEADERS_N =	gpio.h \
+			utils.h \
+			rcc.h
 
 SRC_P 	= ./src/
 OBJ 	= $(addprefix $(OBJ_P),$(SRC_N:.c=.o))

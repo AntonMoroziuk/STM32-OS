@@ -1,19 +1,19 @@
 #include <stdint.h>
 
 #include "gpio.h"
+#include "utils.h"
+#include "rcc.h"
 
 int main()
 {
-    volatile uint32_t *RCC_AHBENR = (uint32_t *)0x40021014;
+    rcc_io_set(A, 1);
 
-    *RCC_AHBENR |= (1 << 17);
-
-    GPIO_config PA5_config;
-
-    PA5_config.pin = GPIO_PIN_5;
-    PA5_config.mode = GPIO_MODE_OUTPUT;
-    PA5_config.pull = GPIO_NO_PUPD;
-    PA5_config.speed = GPIO_SPEED_LOW;
+    GPIO_config PA5_config = {
+        .pin = GPIO_PIN_5,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull = GPIO_NO_PUPD,
+        .speed = GPIO_SPEED_LOW 
+    };
 
     gpio_init(GPIOA, &PA5_config);
     gpio_set(GPIOA, (uint8_t)5, (uint8_t)1);
