@@ -35,6 +35,6 @@ typedef enum    IO_PORT_e
     F
 }               IO_PORT;
 
-void    rcc_io_set(IO_PORT io_port, uint8_t enable);
+void    rcc_gpio_set(IO_PORT io_port, uint8_t enable);
 
 #endif

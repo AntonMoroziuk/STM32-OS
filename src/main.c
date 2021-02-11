@@ -6,7 +6,7 @@
 
 int main()
 {
-    rcc_io_set(A, 1);
+    rcc_gpio_set(A, 1);
 
     GPIO_config PA5_config = {
         .pin = GPIO_PIN_5,
