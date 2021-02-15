@@ -13,6 +13,9 @@ typedef struct  GPIO_s
     volatile uint32_t    ODR;        /* GPIO output data register,                   Address offset 0x14 */
     volatile uint32_t    BSRR;       /* GPIO bit set/reset register register,        Address offset 0x18 */
     volatile uint32_t    LCKR;       /* GPIO configuration lock register,            Address offset 0x1c */
+    volatile uint32_t    AFRL;       /* GPIO alternate function low register,        Address offset 0x20 */
+    volatile uint32_t    AFRH;       /* GPIO alternate function high register,       Address offset 0x24 */
+    volatile uint32_t    BRR;        /* GPIO bit reset register register,            Address offset 0x28 */
 }               GPIO;
 
 typedef struct  GPIO_config_s
@@ -78,9 +81,19 @@ typedef struct  GPIO_config_s
 #define GPIO_PIN_14                 0x0000000eU
 #define GPIO_PIN_15                 0x0000000fU
 
+/* Alternate function selection values */
+#define AF0                         0x0
+#define AF1                         0x1
+#define AF2                         0x2
+#define AF3                         0x3
+#define AF4                         0x4
+#define AF5                         0x5
+#define AF6                         0x6
+#define AF7                         0x7
 
 /* Note that to use GPIO you need to enable corresponding RCC */
 void    gpio_init(GPIO *GPIOx, GPIO_config *GPIO_init);
+void    gpio_select_alternate_function(GPIO *GPIOx, uint8_t pin, uint8_t function);
 void    gpio_set(GPIO *GPIOx, uint8_t pin, uint8_t value);
 
 #endif

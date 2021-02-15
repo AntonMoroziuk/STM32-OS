@@ -18,11 +18,13 @@ SRC_N 	= 	reset_handler.c \
 			main.c \
 			gpio.c \
 			utils.c \
-			rcc.c
+			rcc.c \
+			uart.c
 
 HEADERS_N =	gpio.h \
 			utils.h \
-			rcc.h
+			rcc.h \
+			uart.h
 
 SRC_P 	= ./src/
 OBJ 	= $(addprefix $(OBJ_P),$(SRC_N:.c=.o))
@@ -52,6 +54,9 @@ fclean: clean
 
 flash: all
 	openocd -f "board/st_nucleo_f0.cfg" -c "program kernel.elf"
+
+debug: all
+	arm-none-eabi-gdb kernel.elf
 
 re: fclean all
 

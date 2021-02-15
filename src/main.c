@@ -3,6 +3,7 @@
 #include "gpio.h"
 #include "utils.h"
 #include "rcc.h"
+#include "uart.h"
 
 int main()
 {
@@ -17,6 +18,18 @@ int main()
 
     gpio_init(GPIOA, &PA5_config);
     gpio_set(GPIOA, (uint8_t)5, (uint8_t)1);
+
+    UART_config uart_config = {
+        .word_length = EIGHT_BITS,
+        .baud_rate = DEFAULT_BRR_VALUE,
+        .stop_bits = ONE_BIT,
+        .port = UART1
+    };
+    uart_configure(&uart_config);
+
+    char buf[] = "Hello, world!\n";
+
+    uart_write(UART1, buf, sizeof(buf));
 
     while (1) {}
 
