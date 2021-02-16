@@ -8,6 +8,7 @@
 int main()
 {
     rcc_gpio_set(A, 1);
+    rcc_uart_set(UART_PORT_1, 1);
 
     GPIO_config PA5_config = {
         .pin = GPIO_PIN_5,
@@ -27,9 +28,10 @@ int main()
     };
     uart_configure(&uart_config);
 
-    char buf[] = "Hello, world!\n";
+    char buf[] = "a";
 
-    uart_write(UART1, buf, sizeof(buf));
+    while (1)
+        uart_write(UART1, buf, 1);
 
     while (1) {}
 
