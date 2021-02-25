@@ -30,8 +30,8 @@ typedef struct  GPIO_config_s
 /* GPIO_MODER possible values */
 #define GPIO_MODE_INPUT             (0x00000000U)
 #define GPIO_MODE_OUTPUT            (0x00000001U)
-#define GPIO_MODE_ALTERNATE_FUNC    (0x00000010U)
-#define GPIO_MODE_ANALOG            (0x00000011U)
+#define GPIO_MODE_ALTERNATE_FUNC    (0x00000002U)
+#define GPIO_MODE_ANALOG            (0x00000003U)
 
 /* GPIO_OTYPER possible values */
 #define GPIO_TYPE_PUSH_PULL         (0x00000000U)
@@ -40,28 +40,20 @@ typedef struct  GPIO_config_s
 /* GPIO_OSPEEDR possible values */
 #define GPIO_SPEED_LOW              (0x00000000U)
 #define GPIO_SPEED_MEDIUM           (0x00000001U)
-#define GPIO_SPEED_HIGH             (0x00000011U)
+#define GPIO_SPEED_HIGH             (0x00000003U)
 
 /* GPIO_PUPDR possible values */
 #define GPIO_NO_PUPD                (0x00000000U)
 #define GPIO_PULL_UP                (0x00000001U)
-#define GPIO_PULL_DOWN              (0x00000010U)
-
-/* GPIO group offset values */
-#define GPIOA_BASE                  (0x48000000U)
-#define GPIOB_BASE                  (0x48000400U)
-#define GPIOC_BASE                  (0x48000800U)
-#define GPIOD_BASE                  (0x48000C00U)
-#define GPIOE_BASE                  (0x48001000U)
-#define GPIOF_BASE                  (0x48001400U)
+#define GPIO_PULL_DOWN              (0x00000002U)
 
 /* GPIO group object */
-#define GPIOA                       ((GPIO *)GPIOA_BASE)
-#define GPIOB                       ((GPIO *)GPIOB_BASE)
-#define GPIOC                       ((GPIO *)GPIOC_BASE)
-#define GPIOD                       ((GPIO *)GPIOD_BASE)
-#define GPIOE                       ((GPIO *)GPIOE_BASE)
-#define GPIOF                       ((GPIO *)GPIOF_BASE)
+#define GPIOA                       ((GPIO *)0x48000000U)
+#define GPIOB                       ((GPIO *)0x48000400U)
+#define GPIOC                       ((GPIO *)0x48000800U)
+#define GPIOD                       ((GPIO *)0x48000C00U)
+#define GPIOE                       ((GPIO *)0x48001000U)
+#define GPIOF                       ((GPIO *)0x48001400U)
 
 /* GPIO pin offset inside group */
 #define GPIO_PIN_0                  0x00000000U
