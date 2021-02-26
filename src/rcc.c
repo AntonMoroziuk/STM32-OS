@@ -14,7 +14,7 @@
 /* CFGR3 register bit offsets */
 #define USART2SW_OFFSET (16)
 
-void rcc_init_clocks()
+void rcc_init_clocks(void)
 {
     /* Lower HSI frequency */
     RCC->CR = set_bits_with_offset(RCC->CR, HSITRIM_OFFSET, 5, 10);

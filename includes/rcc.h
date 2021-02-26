@@ -29,7 +29,7 @@ typedef enum    IO_PORT_e
     C,
     D,
     E,
-    F
+    F,
 }               IO_PORT;
 
 typedef enum    UART_PORT_e
@@ -44,7 +44,7 @@ typedef enum    UART_PORT_e
     UART_PORT_8 = 7
 }               UART_PORT;
 
-void    rcc_init_clocks();
+void    rcc_init_clocks(void);
 void    rcc_gpio_set(IO_PORT io_port, uint8_t enable);
 void    rcc_uart_set(UART_PORT uart_port, uint8_t enable);
 

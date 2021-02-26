@@ -13,7 +13,7 @@
 #define STOP_OFFSET     (12)
 
 /* ISR register bit offsets */
-#define RNXE_OFFSET     (5)
+#define RXNE_OFFSET     (5)
 #define TC_OFFSET       (6)
 #define TXE_OFFSET      (7)
 
@@ -39,16 +39,13 @@ void    uart_configure(UART_t *uart, UART_config *config)
     switch (config->word_length)
     {
         case EIGHT_BITS:
-            uart->CR1 = set_bits_with_offset(uart->CR1, M1_OFFSET, 1, 0);
-            uart->CR1 = set_bits_with_offset(uart->CR1, M0_OFFSET, 1, 0);
+            uart->CR1 = set_bits_with_offset(set_bits_with_offset(uart->CR1, M1_OFFSET, 1, 0), M0_OFFSET, 1, 0);
             break ;
         case NINE_BITS:
-            uart->CR1 = set_bits_with_offset(uart->CR1, M1_OFFSET, 1, 0);
-            uart->CR1 = set_bits_with_offset(uart->CR1, M0_OFFSET, 1, 1);
+            uart->CR1 = set_bits_with_offset(set_bits_with_offset(uart->CR1, M1_OFFSET, 1, 0), M0_OFFSET, 1, 1);
             break ;
         case SEVEN_BITS:
-            uart->CR1 = set_bits_with_offset(uart->CR1, M1_OFFSET, 1, 1);
-            uart->CR1 = set_bits_with_offset(uart->CR1, M0_OFFSET, 1, 0);
+            uart->CR1 = set_bits_with_offset(set_bits_with_offset(uart->CR1, M1_OFFSET, 1, 1), M0_OFFSET, 1, 0);
             break ;
     }
 
@@ -82,7 +79,7 @@ void    uart_read(UART_t *uart, char buf[], size_t len)
     for (size_t i = 0; i < len; i++)
     {
         /* Wait until data is received */
-        while (!(uart->ISR & (1 << RNXE_OFFSET))) ;
+        while (!(uart->ISR & (1 << RXNE_OFFSET))) ;
 
         buf[i] = uart->RDR;
     }

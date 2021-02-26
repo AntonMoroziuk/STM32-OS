@@ -22,9 +22,9 @@ void    gpio_select_alternate_function(GPIO *GPIOx, uint8_t pin, uint8_t functio
 {
     const uint8_t offset = (pin % 8) * 4;
 
-    GPIOx->MODER = set_bits_with_offset(GPIOx->MODER, pin * 2U, 2, GPIO_MODE_ALTERNATE_FUNC);
     if (pin <= 7)
         GPIOx->AFRL = set_bits_with_offset(GPIOx->AFRL, offset, 4, function);
     else
         GPIOx->AFRH = set_bits_with_offset(GPIOx->AFRH, offset, 4, function);
+    GPIOx->MODER = set_bits_with_offset(GPIOx->MODER, pin * 2U, 2, GPIO_MODE_ALTERNATE_FUNC);
 }

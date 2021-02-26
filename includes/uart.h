@@ -22,7 +22,7 @@ typedef enum    WORD_LENGTH_e
 {
     EIGHT_BITS,
     NINE_BITS,
-    SEVEN_BITS
+    SEVEN_BITS,
 }               WORD_LENGTH;
 
 typedef enum    STOP_BITS_e
@@ -30,7 +30,7 @@ typedef enum    STOP_BITS_e
     ONE_BIT,
     HALF_BIT,
     TWO_BITS,
-    ONE_AND_HALF_BIT
+    ONE_AND_HALF_BIT,
 }               STOP_BITS;
 
 #define DEFAULT_BRR_VALUE 0x34U

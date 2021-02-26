@@ -15,7 +15,7 @@ int main()
         .pin = GPIO_PIN_5,
         .mode = GPIO_MODE_OUTPUT,
         .pull = GPIO_NO_PUPD,
-        .speed = GPIO_SPEED_LOW
+        .speed = GPIO_SPEED_LOW,
     };
 
     gpio_init(GPIOA, &PA5_config);
@@ -24,7 +24,7 @@ int main()
     UART_config uart_config = {
         .word_length = EIGHT_BITS,
         .baud_rate = DEFAULT_BRR_VALUE,
-        .stop_bits = ONE_BIT
+        .stop_bits = ONE_BIT,
     };
     uart_configure(UART2, &uart_config);
 
