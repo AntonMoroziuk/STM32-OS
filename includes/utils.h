@@ -9,7 +9,7 @@ static inline uint32_t set_bits_with_offset(uint32_t field, unsigned int offset,
 {
     uint32_t temp;
 
-    temp = field & ~((1 << width) - 1);
+    temp = field & ~(((1 << width) - 1) << offset);
     temp |= value << offset;
 
     return (temp);

@@ -9,21 +9,18 @@ typedef struct RCC_s
     volatile uint32_t    APB2RSTR;  /* APB peripheral reset register 2,         Address offset 0x0c */
     volatile uint32_t    APB1RSTR;  /* APB peripheral reset register 1,         Address offset 0x10 */
     volatile uint32_t    AHBENR;    /* AHB peripheral clock enable register,    Address offset 0x14 */
-    volatile uint32_t    AHB2ENR;   /* AHB peripheral clock enable register 2,  Address offset 0x18 */
-    volatile uint32_t    AHB1ENR;   /* AHB peripheral clock enable register 1,  Address offset 0x1c */
+    volatile uint32_t    APB2ENR;   /* APB peripheral clock enable register 2,  Address offset 0x18 */
+    volatile uint32_t    APB1ENR;   /* APB peripheral clock enable register 1,  Address offset 0x1c */
     volatile uint32_t    BDCR;      /* RTC domain control register,             Address offset 0x20 */
-    volatile uint32_t    CSR;       /*  Control/status register,                Address offset 0x24 */
+    volatile uint32_t    CSR;       /* Control/status register,                 Address offset 0x24 */
     volatile uint32_t    AHBRSTR;   /* AHB peripheral reset register,           Address offset 0x28 */
     volatile uint32_t    CFGR2;     /* Clock configuration register 2,          Address offset 0x2c */
     volatile uint32_t    CFGR3;     /* Clock configuration register 3,          Address offset 0x30 */
     volatile uint32_t    CR2;       /* Clock control register 2,                Address offset 0x34 */
-}              RCC_t; 
-
-/* RCC memory offset */
-#define RCC_BASE        (0x40021000U)
+}              RCC_t;
 
 /* RCC object */
-#define RCC             ((RCC_t *)RCC_BASE)
+#define RCC             ((RCC_t *)0x40021000U)
 
 typedef enum    IO_PORT_e
 {
@@ -32,9 +29,23 @@ typedef enum    IO_PORT_e
     C,
     D,
     E,
-    F
+    F,
 }               IO_PORT;
 
+typedef enum    UART_PORT_e
+{
+    UART_PORT_1 = 14,
+    UART_PORT_2 = 17,
+    UART_PORT_3 = 18,
+    UART_PORT_4 = 19,
+    UART_PORT_5 = 20,
+    UART_PORT_6 = 5,
+    UART_PORT_7 = 6,
+    UART_PORT_8 = 7
+}               UART_PORT;
+
+void    rcc_init_clocks(void);
 void    rcc_gpio_set(IO_PORT io_port, uint8_t enable);
+void    rcc_uart_set(UART_PORT uart_port, uint8_t enable);
 
 #endif

@@ -13,6 +13,9 @@ typedef struct  GPIO_s
     volatile uint32_t    ODR;        /* GPIO output data register,                   Address offset 0x14 */
     volatile uint32_t    BSRR;       /* GPIO bit set/reset register register,        Address offset 0x18 */
     volatile uint32_t    LCKR;       /* GPIO configuration lock register,            Address offset 0x1c */
+    volatile uint32_t    AFRL;       /* GPIO alternate function low register,        Address offset 0x20 */
+    volatile uint32_t    AFRH;       /* GPIO alternate function high register,       Address offset 0x24 */
+    volatile uint32_t    BRR;        /* GPIO bit reset register register,            Address offset 0x28 */
 }               GPIO;
 
 typedef struct  GPIO_config_s
@@ -27,8 +30,8 @@ typedef struct  GPIO_config_s
 /* GPIO_MODER possible values */
 #define GPIO_MODE_INPUT             (0x00000000U)
 #define GPIO_MODE_OUTPUT            (0x00000001U)
-#define GPIO_MODE_ALTERNATE_FUNC    (0x00000010U)
-#define GPIO_MODE_ANALOG            (0x00000011U)
+#define GPIO_MODE_ALTERNATE_FUNC    (0x00000002U)
+#define GPIO_MODE_ANALOG            (0x00000003U)
 
 /* GPIO_OTYPER possible values */
 #define GPIO_TYPE_PUSH_PULL         (0x00000000U)
@@ -37,28 +40,20 @@ typedef struct  GPIO_config_s
 /* GPIO_OSPEEDR possible values */
 #define GPIO_SPEED_LOW              (0x00000000U)
 #define GPIO_SPEED_MEDIUM           (0x00000001U)
-#define GPIO_SPEED_HIGH             (0x00000011U)
+#define GPIO_SPEED_HIGH             (0x00000003U)
 
 /* GPIO_PUPDR possible values */
 #define GPIO_NO_PUPD                (0x00000000U)
 #define GPIO_PULL_UP                (0x00000001U)
-#define GPIO_PULL_DOWN              (0x00000010U)
-
-/* GPIO group offset values */
-#define GPIOA_BASE                  (0x48000000U)
-#define GPIOB_BASE                  (0x48000400U)
-#define GPIOC_BASE                  (0x48000800U)
-#define GPIOD_BASE                  (0x48000C00U)
-#define GPIOE_BASE                  (0x48001000U)
-#define GPIOF_BASE                  (0x48001400U)
+#define GPIO_PULL_DOWN              (0x00000002U)
 
 /* GPIO group object */
-#define GPIOA                       ((GPIO *)GPIOA_BASE)
-#define GPIOB                       ((GPIO *)GPIOB_BASE)
-#define GPIOC                       ((GPIO *)GPIOC_BASE)
-#define GPIOD                       ((GPIO *)GPIOD_BASE)
-#define GPIOE                       ((GPIO *)GPIOE_BASE)
-#define GPIOF                       ((GPIO *)GPIOF_BASE)
+#define GPIOA                       ((GPIO *)0x48000000U)
+#define GPIOB                       ((GPIO *)0x48000400U)
+#define GPIOC                       ((GPIO *)0x48000800U)
+#define GPIOD                       ((GPIO *)0x48000C00U)
+#define GPIOE                       ((GPIO *)0x48001000U)
+#define GPIOF                       ((GPIO *)0x48001400U)
 
 /* GPIO pin offset inside group */
 #define GPIO_PIN_0                  0x00000000U
@@ -78,9 +73,19 @@ typedef struct  GPIO_config_s
 #define GPIO_PIN_14                 0x0000000eU
 #define GPIO_PIN_15                 0x0000000fU
 
+/* Alternate function selection values */
+#define AF0                         0x0
+#define AF1                         0x1
+#define AF2                         0x2
+#define AF3                         0x3
+#define AF4                         0x4
+#define AF5                         0x5
+#define AF6                         0x6
+#define AF7                         0x7
 
 /* Note that to use GPIO you need to enable corresponding RCC */
 void    gpio_init(GPIO *GPIOx, GPIO_config *GPIO_init);
+void    gpio_select_alternate_function(GPIO *GPIOx, uint8_t pin, uint8_t function);
 void    gpio_set(GPIO *GPIOx, uint8_t pin, uint8_t value);
 
 #endif
