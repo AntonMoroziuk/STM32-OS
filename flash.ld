@@ -21,7 +21,8 @@ SECTIONS
     .bss (NOLOAD) :
     {
         _sbss = . ;
-        *(bss.*)
+        *(.bss)
+        *(.bss*)
         *(COMMON)
         _ebss = . ;
     } > ram
