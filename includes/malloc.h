@@ -4,24 +4,25 @@
 #include <stdint.h>
 #include <unistd.h>
 
-extern uint32_t _ebss;
+extern uint32_t _estack;
 
-#define HEAP_START ((void*)&_ebss);
+#define HEAP_START ((void*)&_estack)
 
 #define ALIGN(x) (((((x) - 1) >> 2) << 2) + 4)
 
-#define HEADER_SIZE (sizeof(size_t) * 2 + sizeof(int) + sizeof(void*) * 2)
+#define HEADER_SIZE (sizeof(struct block_header_s))
 
-#define RAM_SIZE 32000
+#define RAM_END     (0x20008000U)
+
+#define HEAP_SIZE  (RAM_END - (unsigned int)HEAP_START)
 
 typedef struct  block_header_s
 {
     size_t                  size;
-    size_t                  used;
     struct block_header_s   *next;
     struct block_header_s   *prev;
     int                     free;
-    char                    data[1];
+    uint8_t                 data[];
 
 }               block_header;
 

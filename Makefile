@@ -20,7 +20,6 @@ SRC_N 	= 	reset_handler.c \
 			rcc.c \
 			uart.c \
 			malloc.c \
-			free.c \
 			task.c
 
 ASM_N 	=	context_switch.s
