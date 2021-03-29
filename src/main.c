@@ -4,6 +4,31 @@
 #include "utils.h"
 #include "rcc.h"
 #include "uart.h"
+#include "malloc.h"
+#include "asm.h"
+#include "task.h"
+
+void hello_world(void)
+{
+    char buf[] = "Hello world!\r\n";
+
+    while (1)
+    {
+        uart_write(UART2, buf, 14);
+        yield();
+    }
+}
+
+void bye_world(void)
+{
+    char buf[] = "Bye!\r\n";
+
+    while (1)
+    {
+        uart_write(UART2, buf, 6);
+        yield();
+    }
+}
 
 int main()
 {
@@ -28,10 +53,9 @@ int main()
     };
     uart_configure(UART2, &uart_config);
 
-    char buf[] = "Hello world!\r\n";
-
-    while (1)
-        uart_write(UART2, buf, 14);
+    task_add(&hello_world, 256);
+    task_add(&bye_world, 256);
+    task_scheduler();
 
     return (0);
 }

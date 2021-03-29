@@ -1,6 +1,5 @@
 CC 		= arm-none-eabi-gcc
 CCFLAGS	= 	-Wall \
-			-Werror \
 			-Wextra \
 			-mcpu=cortex-m0 \
 			-mthumb \
@@ -19,14 +18,22 @@ SRC_N 	= 	reset_handler.c \
 			gpio.c \
 			utils.c \
 			rcc.c \
-			uart.c
+			uart.c \
+			malloc.c \
+			task.c
+
+ASM_N 	=	context_switch.s
 
 HEADERS_N =	gpio.h \
 			utils.h \
 			rcc.h \
-			uart.h
+			uart.h \
+			asm.h \
+			malloc.h \
+			task.h
 
 SRC_P 	= ./src/
+ASM		= $(addprefix $(SRC_P), $(ASM_N))
 OBJ 	= $(addprefix $(OBJ_P),$(SRC_N:.c=.o))
 OBJ_P	= ./obj/
 INC 	= $(addprefix -I, $(INC_P))
@@ -43,8 +50,8 @@ obj:
 $(OBJ_P)%.o: $(SRC_P)%.c $(HEADERS)
 	$(CC) $(CCFLAGS) -I $(INC_P) -o $@ -c $<
 
-$(NAME): $(OBJ)
-	$(CC) $(LDFLAGS) $(OBJ) -o $(NAME)
+$(NAME): $(OBJ) $(ASM) flash.ld
+	$(CC) $(LDFLAGS) $(OBJ) -o $(NAME) $(ASM)
 
 clean:
 	rm -rf $(OBJ_P)
