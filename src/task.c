@@ -4,18 +4,25 @@
 #include "asm.h"
 #include "malloc.h"
 
-static unsigned int *tasks[TASK_LIMIT];
+// During context switch we push 8 registers to stack
+#define CONTEXT_SIZE 8
 
-void    task_add(void (*task_code)(void), uint16_t stack_size)
+static uint32_t *tasks[TASK_LIMIT];
+
+void    task_add(void (*task_code)(void), size_t stack_size)
 {
     int i = 0;
 
     while (tasks[i])
         i++;
-    tasks[i] = (unsigned int*)malloc(sizeof(unsigned int) * stack_size);
+    tasks[i] = (uint32_t*)malloc(stack_size);
 
-    tasks[i] += stack_size - 8;
-    tasks[i][0] = (unsigned int)task_code;
+    /*
+     * During first context switch we will pop 8 registers
+     * and pc register from stack, so we need space for them
+     * */
+    tasks[i] += stack_size - CONTEXT_SIZE;
+    tasks[i][0] = (uint32_t)task_code;
 }
 
 void    task_scheduler(void)

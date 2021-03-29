@@ -8,13 +8,14 @@ extern uint32_t _estack;
 
 #define HEAP_START ((void*)&_estack)
 
+// Round up malloced size to be multiple of 32 bits
 #define ALIGN(x) (((((x) - 1) >> 2) << 2) + 4)
 
 #define HEADER_SIZE (sizeof(struct block_header_s))
 
 #define RAM_END     (0x20008000U)
 
-#define HEAP_SIZE  (RAM_END - (unsigned int)HEAP_START)
+#define HEAP_SIZE  (RAM_END - (size_t)HEAP_START)
 
 typedef struct  block_header_s
 {
