@@ -21,10 +21,6 @@ void task_delete()
         stacks[i] = stacks[i + 1];
     }
 
-    /*
-     * When adding task we've changed the pointer returned
-     * from malloc, so we need to restore it
-     * */
     free(temp);
     yield();
 }
@@ -34,6 +30,8 @@ void    task_add(void (*task_code)(void), size_t stack_size)
     static int i;
 
     tasks[i] = (uint32_t*)malloc(stack_size);
+    if (!tasks[i])
+        return ;
 
     /*
      * During first context switch we will pop 8 registers
