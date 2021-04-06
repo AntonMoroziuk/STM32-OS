@@ -1,15 +1,17 @@
 .global activate
 activate:
-    msr psp, r0
+    ldr r1, [r0]
+    msr psp, r1
     push {r0-r7, lr}
+
+    ldr r1, =task_delete
+    mov lr, r1
 
     /* Use process stack pointer */
     mrs r1, control
     add r1, #2
     msr control, r1
 
-    ldr r2, [r0]
-    movs pc, r2
     pop {r0-r7, pc}
 
 .global yield
@@ -21,4 +23,7 @@ yield:
     sub r0, #2
     msr control, r0
 
-    pop {r0-r7, pc}
+    pop {r0}
+    mrs r1, psp
+    str r1, [r0]
+    pop {r1-r7, pc}
