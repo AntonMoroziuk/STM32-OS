@@ -19,15 +19,45 @@ void hello_world(void)
     }
 }
 
+void test1(void)
+{
+    char buf[] = "test1!\r\n";
+
+    uart_write(UART2, buf, 8);
+}
+
+void test2(void)
+{
+    char buf[] = "test2!\r\n";
+
+    uart_write(UART2, buf, 8);
+    test1();
+}
+
 void bye_world(void)
 {
     char buf[] = "Bye!\r\n";
 
-    while (1)
-    {
-        uart_write(UART2, buf, 6);
-        yield();
-    }
+    uart_write(UART2, buf, 6);
+    test1();
+    yield();
+    test2();
+    yield();
+
+    char buf1[] = "Kek!\r\n";
+
+    uart_write(UART2, buf1, 6);
+    test1();
+    test2();
+    yield();
+    test1();
+    test2();
+    yield();
+
+    char buf2[] = "Wtf!\r\n";
+
+    uart_write(UART2, buf2, 6);
+    yield();
 }
 
 int main()
