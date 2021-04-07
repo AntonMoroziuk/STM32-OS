@@ -19,19 +19,29 @@ void hello_world(void)
     }
 }
 
-void test1(void)
+void dummy(void)
 {
-    char buf[] = "test1!\r\n";
 
-    uart_write(UART2, buf, 8);
 }
 
-void test2(void)
+void test3(void)
 {
-    char buf[] = "test2!\r\n";
+    char buf[] = "0\r\n";
 
-    uart_write(UART2, buf, 8);
-    test1();
+    for (int i = 0; i < 10; i++)
+    {
+        buf[0] = i + '0';
+        uart_write(UART2, buf, 3);
+        yield();
+    }
+}
+
+void test1(void)
+{
+    char buf[] = "Hello world!\r\n";
+
+    uart_write(UART2, buf, 14);
+    task_add(&test1, 256);
 }
 
 void bye_world(void)
@@ -39,19 +49,11 @@ void bye_world(void)
     char buf[] = "Bye!\r\n";
 
     uart_write(UART2, buf, 6);
-    test1();
-    yield();
-    test2();
     yield();
 
     char buf1[] = "Kek!\r\n";
 
     uart_write(UART2, buf1, 6);
-    test1();
-    test2();
-    yield();
-    test1();
-    test2();
     yield();
 
     char buf2[] = "Wtf!\r\n";
@@ -83,8 +85,9 @@ int main()
     };
     uart_configure(UART2, &uart_config);
 
-    task_add(&hello_world, 256);
-    task_add(&bye_world, 256);
+    task_add(&dummy, 256);
+    task_add(&dummy, 256);
+    task_add(&test3, 256);
     task_scheduler();
 
     return (0);

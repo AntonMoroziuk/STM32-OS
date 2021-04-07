@@ -2,7 +2,7 @@
 #define TASK_H
 
 #include <stdint.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 #define TASK_LIMIT 16
 

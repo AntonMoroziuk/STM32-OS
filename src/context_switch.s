@@ -27,3 +27,12 @@ yield:
     mrs r1, psp
     str r1, [r0]
     pop {r1-r7, pc}
+
+.global exit
+exit:
+    /* Use main stack pointer */
+    mrs r0, control
+    sub r0, #2
+    msr control, r0
+
+    pop {r0-r7, pc}
