@@ -15,12 +15,13 @@ void task_delete()
 {
     uint32_t *temp = tasks[cur_task];
 
-    for (int i = cur_task; tasks[i]; i++)
+    for (int i = cur_task; tasks[i] && i < TASK_LIMIT - 1; i++)
     {
         tasks[i] = tasks[i + 1];
         stacks[i] = stacks[i + 1];
     }
-
+    tasks[TASK_LIMIT - 1] = NULL;
+    stacks[TASK_LIMIT - 1] = NULL;
     free(temp);
     exit();
 }
@@ -29,8 +30,12 @@ void    task_add(void (*task_code)(void), size_t stack_size)
 {
     int i = 0;
 
-    while (tasks[i])
+    while (tasks[i] && i < TASK_LIMIT)
         i++;
+
+    if (i == TASK_LIMIT)
+        return ;
+
     tasks[i] = (uint32_t*)malloc(stack_size);
     if (!tasks[i])
         return ;
@@ -47,15 +52,11 @@ void    task_scheduler(void)
 {
     while(1)
     {
-        if (!tasks[cur_task])
-            cur_task = 0;
-
-        // We ran out of tasks
-        if (!tasks[cur_task])
+        cur_task = 0;
+        while (tasks[cur_task] && cur_task < TASK_LIMIT)
         {
-            while (1) ;
+            activate(stacks + cur_task);
+            cur_task++;
         }
-        activate(stacks + cur_task);
-        cur_task++;
     }
 }

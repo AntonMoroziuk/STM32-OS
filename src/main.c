@@ -36,6 +36,32 @@ void test3(void)
     }
 }
 
+void recursive(int step)
+{
+    char buf1[] = "enter  \r\n";
+    char buf2[] = "exit  \r\n";
+    char buf[] = "yield\r\n";
+
+    buf1[6] = step + '0';
+    buf2[5] = step + '0';
+    uart_write(UART2, buf1, 9);
+    if (step)
+    {
+        recursive(step - 1);
+    }
+    else
+    {
+        uart_write(UART2, buf, 7);
+        yield();
+    }
+    uart_write(UART2, buf2, 8);
+}
+
+void test2(void)
+{
+    recursive(2);
+}
+
 void test1(void)
 {
     char buf[] = "Hello world!\r\n";
@@ -85,9 +111,7 @@ int main()
     };
     uart_configure(UART2, &uart_config);
 
-    task_add(&dummy, 256);
-    task_add(&dummy, 256);
-    task_add(&test3, 256);
+    task_add(&test2, 256);
     task_scheduler();
 
     return (0);
