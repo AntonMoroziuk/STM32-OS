@@ -11,7 +11,7 @@ static uint32_t *tasks[TASK_LIMIT];
 static uint32_t *stacks[TASK_LIMIT];
 static int      cur_task;
 
-void task_delete()
+void    task_delete()
 {
     uint32_t *temp = tasks[cur_task];
 
@@ -26,7 +26,7 @@ void task_delete()
     exit();
 }
 
-void    task_add(void (*task_code)(void), size_t stack_size)
+int     task_add(void (*task_code)(void), size_t stack_size)
 {
     int i = 0;
 
@@ -34,11 +34,11 @@ void    task_add(void (*task_code)(void), size_t stack_size)
         i++;
 
     if (i == TASK_LIMIT)
-        return ;
+        return (ERR_TASK_LIMIT);
 
     tasks[i] = (uint32_t*)malloc(stack_size);
     if (!tasks[i])
-        return ;
+        return (ERR_MALLOC_FAIL);
 
     /*
      * During first context switch we will pop 8 registers
@@ -46,6 +46,7 @@ void    task_add(void (*task_code)(void), size_t stack_size)
      * */
     tasks[i][stack_size] = (uint32_t)task_code;
     stacks[i] = tasks[i] + stack_size - CONTEXT_SIZE;
+    return (0);
 }
 
 void    task_scheduler(void)
