@@ -7,33 +7,14 @@
 #include "malloc.h"
 #include "asm.h"
 #include "task.h"
+#include "lcd.h"
 
-void hello_world(void)
+void test_lcd(void)
 {
-    char buf[] = "Hello world!\r\n";
-
-    while (1)
-    {
-        uart_write(UART2, buf, 14);
-        yield();
-    }
-}
-
-void dummy(void)
-{
-
-}
-
-void test3(void)
-{
-    char buf[] = "0\r\n";
-
-    for (int i = 0; i < 10; i++)
-    {
-        buf[0] = i + '0';
-        uart_write(UART2, buf, 3);
-        yield();
-    }
+    lcd_init();
+    char buf[] = "Hello world!";
+    for (int i = 0; buf[i]; i++)
+        lcd_write(buf[i]);
 }
 
 void recursive(int step)
@@ -92,6 +73,8 @@ int main()
 {
     rcc_init_clocks();
     rcc_gpio_set(A, 1);
+    rcc_gpio_set(B, 1);
+    rcc_gpio_set(C, 1);
     rcc_uart_set(UART_PORT_2, 1);
 
     GPIO_config PA5_config = {
@@ -111,7 +94,8 @@ int main()
     };
     uart_configure(UART2, &uart_config);
 
-    task_add(&test2, 256);
+    task_add(&test_lcd, 1024);
+
     task_scheduler();
 
     return (0);

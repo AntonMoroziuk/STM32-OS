@@ -20,7 +20,8 @@ SRC_N 	= 	reset_handler.c \
 			rcc.c \
 			uart.c \
 			malloc.c \
-			task.c
+			task.c \
+			lcd.c
 
 ASM_N 	=	context_switch.s
 
@@ -30,7 +31,8 @@ HEADERS_N =	gpio.h \
 			uart.h \
 			asm.h \
 			malloc.h \
-			task.h
+			task.h \
+			lcd.h
 
 SRC_P 	= ./src/
 ASM		= $(addprefix $(SRC_P), $(ASM_N))
