@@ -10,7 +10,7 @@ static void *split_block(block_header *block, size_t size)
     if (block->size <= size + 2 * HEADER_SIZE + ALIGN(1))
     {
         block->free = 0;
-        return ((void*)block);
+        return ((void*)block->data);
     }
     temp = (block_header *)(block->data + size);
     temp->size = block->size - size - HEADER_SIZE;
