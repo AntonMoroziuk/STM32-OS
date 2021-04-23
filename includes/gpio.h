@@ -27,6 +27,12 @@ typedef struct  GPIO_config_s
     uint32_t   alternate;   /* TODO: alternate options */
 }               GPIO_config;
 
+typedef struct  GPIO_pin_s
+{
+    uint32_t   pin;
+    GPIO       *group;
+}               GPIO_pin;
+
 /* GPIO_MODER possible values */
 #define GPIO_MODE_INPUT             (0x00000000U)
 #define GPIO_MODE_OUTPUT            (0x00000001U)
@@ -85,7 +91,7 @@ typedef struct  GPIO_config_s
 
 /* Note that to use GPIO you need to enable corresponding RCC */
 void    gpio_init(GPIO *GPIOx, GPIO_config *GPIO_init);
-void    gpio_select_alternate_function(GPIO *GPIOx, uint8_t pin, uint8_t function);
-void    gpio_set(GPIO *GPIOx, uint8_t pin, uint8_t value);
+void    gpio_select_alternate_function(GPIO_pin *gpio, uint8_t function);
+void    gpio_set(GPIO_pin *gpio, uint8_t value);
 
 #endif

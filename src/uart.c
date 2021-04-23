@@ -1,6 +1,8 @@
 #include "uart.h"
 #include "utils.h"
 #include "gpio.h"
+#include "printf.h"
+#include "malloc.h"
 
 /* CR1 register bit offsets */
 #define UE_OFFSET       (0)
@@ -22,15 +24,43 @@ void    uart_configure(UART_t *uart, UART_config *config)
     // TODO: add all UART ports
     if (uart == UART1)
     {
-        gpio_select_alternate_function(GPIOA, GPIO_PIN_8, AF1);
-        gpio_select_alternate_function(GPIOA, GPIO_PIN_9, AF1);
-        gpio_select_alternate_function(GPIOA, GPIO_PIN_10, AF1);
+        GPIO_pin clk = {
+            .pin = GPIO_PIN_8,
+            .group = GPIOA,
+        };
+        gpio_select_alternate_function(&clk, AF1);
+
+        GPIO_pin tx = {
+            .pin = GPIO_PIN_9,
+            .group = GPIOA,
+        };
+        gpio_select_alternate_function(&tx, AF1);
+
+        GPIO_pin rx = {
+            .pin = GPIO_PIN_10,
+            .group = GPIOA,
+        };
+        gpio_select_alternate_function(&rx, AF1);
     }
     else if (uart == UART2)
     {
-        gpio_select_alternate_function(GPIOA, GPIO_PIN_2, AF1);
-        gpio_select_alternate_function(GPIOA, GPIO_PIN_3, AF1);
-        gpio_select_alternate_function(GPIOA, GPIO_PIN_4, AF1);
+        GPIO_pin tx = {
+            .pin = GPIO_PIN_2,
+            .group = GPIOA,
+        };
+        gpio_select_alternate_function(&tx, AF1);
+
+        GPIO_pin rx = {
+            .pin = GPIO_PIN_3,
+            .group = GPIOA,
+        };
+        gpio_select_alternate_function(&rx, AF1);
+
+        GPIO_pin clk = {
+            .pin = GPIO_PIN_4,
+            .group = GPIOA,
+        };
+        gpio_select_alternate_function(&clk, AF1);
     }
 
     /* Disable UART */
@@ -83,4 +113,20 @@ void    uart_read(UART_t *uart, char buf[], size_t len)
 
         buf[i] = uart->RDR;
     }
+}
+
+static void writer_uart_write(writer *self, const char buf[], size_t len)
+{
+    uart_write((UART_t *)self->data, buf, len);
+}
+
+writer *uart_writer(UART_t *uart)
+{
+    writer *res = (writer*)malloc(sizeof(writer));
+    if (!res)
+        return (NULL);
+
+    res->write = &writer_uart_write;
+    res->data = uart;
+    return (res);
 }

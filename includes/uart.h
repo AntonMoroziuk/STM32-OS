@@ -1,6 +1,8 @@
 #ifndef UART_H
 #define UART_H
 
+#include "printf.h"
+
 #include <unistd.h>
 
 typedef struct  UART_s
@@ -56,5 +58,6 @@ typedef struct  UART_config_s
 void    uart_configure(UART_t *uart, UART_config *config);
 void    uart_write(UART_t *uart, const char buf[], size_t len);
 void    uart_read(UART_t *uart, char buf[], size_t len);
+writer  *uart_writer(UART_t *uart);
 
 #endif

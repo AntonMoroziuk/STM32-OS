@@ -7,7 +7,6 @@ CCFLAGS	= 	-Wall \
 			-g
 
 LDFLAGS	= 	-T flash.ld \
-			-nostdlib \
 			-mthumb \
 			-nostartfiles \
 			-g \
@@ -21,7 +20,8 @@ SRC_N 	= 	reset_handler.c \
 			uart.c \
 			malloc.c \
 			task.c \
-			lcd.c
+			lcd.c \
+			printf.c
 
 ASM_N 	=	context_switch.s
 
@@ -32,7 +32,8 @@ HEADERS_N =	gpio.h \
 			asm.h \
 			malloc.h \
 			task.h \
-			lcd.h
+			lcd.h \
+			printf.h
 
 SRC_P 	= ./src/
 ASM		= $(addprefix $(SRC_P), $(ASM_N))

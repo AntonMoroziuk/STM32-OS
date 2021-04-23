@@ -1,228 +1,299 @@
 #include "lcd.h"
 #include "gpio.h"
+#include "printf.h"
+#include "malloc.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 
-typedef struct  LCD_handler_s
+// init commands
+#define LCD_4BIT_INIT          0x2
+#define LCD_8BIT_1LINE_5x8DOTS 0x3
+
+// commands
+#define LCD_CLEARDISPLAY    0x01
+#define LCD_RETURNHOME      0x02
+#define LCD_ENTRYMODESET    0x04
+#define LCD_DISPLAYCONTROL  0x08
+#define LCD_CURSORSHIFT     0x10
+#define LCD_FUNCTIONSET     0x20
+#define LCD_SETCGRAMADDR    0x40
+#define LCD_SETDDRAMADDR    0x80
+
+// flags for display entry mode
+#define LCD_ENTRYRIGHT          0x00
+#define LCD_ENTRYLEFT           0x02
+#define LCD_ENTRYSHIFTINCREMENT 0x01
+#define LCD_ENTRYSHIFTDECREMENT 0x00
+
+// flags for display on/off control
+#define LCD_DISPLAYON   0x04
+#define LCD_DISPLAYOFF  0x00
+#define LCD_CURSORON    0x02
+#define LCD_CURSOROFF   0x00
+#define LCD_BLINKON     0x01
+#define LCD_BLINKOFF    0x00
+
+// flags for display/cursor shift
+#define LCD_DISPLAYMOVE 0x08
+#define LCD_CURSORMOVE  0x00
+#define LCD_MOVERIGHT   0x04
+#define LCD_MOVELEFT    0x00
+
+// flags for function set
+#define LCD_8BITMODE    0x10
+#define LCD_4BITMODE    0x00
+#define LCD_2LINE       0x08
+#define LCD_1LINE       0x00
+#define LCD_5x10DOTS    0x04
+#define LCD_5x8DOTS     0x00
+
+static inline void delay(void)
 {
-    uint8_t rs_pin; // LOW: command.  HIGH: character.
-    uint8_t rw_pin; // LOW: write to LCD.  HIGH: read from LCD.
-    uint8_t enable_pin; // activated by a HIGH pulse.
-    uint8_t data_pins[8];
-
-    uint8_t displayfunction;
-    uint8_t displaycontrol;
-    uint8_t displaymode;
-
-    uint8_t initialized;
-
-    uint8_t numlines;
-    uint8_t row_offsets[4];
-}               LCD_handler;
-
-static LCD_handler handler;
-
-static void    pulse_enable(void)
-{
-    gpio_set(GPIOC, handler.enable_pin, 0);
-    DELAY
-    gpio_set(GPIOC, handler.enable_pin, 1);
-    DELAY
-    gpio_set(GPIOC, handler.enable_pin, 0);
-    DELAY
+    for (volatile int i = 0; i < 10000; i++) ;
 }
 
-static void    write4bits(uint8_t value)
+static void    pulse_enable(LCD_handler *handler)
 {
-    gpio_set(GPIOB, handler.data_pins[0], (value >> 0) & 0x1);
-    gpio_set(GPIOB, handler.data_pins[1], (value >> 1) & 0x1);
-    gpio_set(GPIOB, handler.data_pins[2], (value >> 2) & 0x1);
-    gpio_set(GPIOA, handler.data_pins[3], (value >> 3) & 0x1);
-
-    pulse_enable();
+    gpio_set(handler->enable_pin, 0);
+    delay();
+    gpio_set(handler->enable_pin, 1);
+    delay();
+    gpio_set(handler->enable_pin, 0);
+    delay();
 }
 
-void    lcd_clear(void)
+static void    write4bits(LCD_handler *handler, uint8_t value)
 {
-    lcd_command(LCD_CLEARDISPLAY);
-    DELAY
+    gpio_set(handler->data_pins[0], (value >> 0) & 0x1);
+    gpio_set(handler->data_pins[1], (value >> 1) & 0x1);
+    gpio_set(handler->data_pins[2], (value >> 2) & 0x1);
+    gpio_set(handler->data_pins[3], (value >> 3) & 0x1);
+
+    pulse_enable(handler);
 }
 
-void    lcd_home(void)
+static void    lcd_command(LCD_handler *handler, uint8_t value)
 {
-    lcd_command(LCD_RETURNHOME);
-    DELAY
+    gpio_set(handler->rs_pin, 0);
+    write4bits(handler, value >> 4);
+    write4bits(handler, value);
 }
 
-void    lcd_set_cursor(uint8_t col, uint8_t row)
+void    lcd_clear(LCD_handler *handler)
 {
-    const size_t max_lines = sizeof(handler.row_offsets) / sizeof(*handler.row_offsets);
+    lcd_command(handler, LCD_CLEARDISPLAY);
+    delay();
+}
+
+void    lcd_home(LCD_handler *handler)
+{
+    lcd_command(handler, LCD_RETURNHOME);
+    delay();
+}
+
+void    lcd_set_cursor(LCD_handler *handler, uint8_t col, uint8_t row)
+{
+    const size_t max_lines = sizeof(handler->row_offsets) / sizeof(*handler->row_offsets);
     if (row >= max_lines)
         row = max_lines - 1;    // we count rows starting w/ 0
-    if (row >= handler.numlines)
-        row = handler.numlines - 1;    // we count rows starting w/ 0
+    if (row >= handler->numlines)
+        row = handler->numlines - 1;    // we count rows starting w/ 0
 
-    lcd_command(LCD_SETDDRAMADDR | (col + handler.row_offsets[row]));
+    lcd_command(handler, LCD_SETDDRAMADDR | (col + handler->row_offsets[row]));
 }
 
-void    lcd_display_off(void)
+void    lcd_display_off(LCD_handler *handler)
 {
-    handler.displaycontrol &= ~LCD_DISPLAYON;
-    lcd_command(LCD_DISPLAYCONTROL | handler.displaycontrol);
+    handler->displaycontrol &= ~LCD_DISPLAYON;
+    lcd_command(handler, LCD_DISPLAYCONTROL | handler->displaycontrol);
 }
 
-void    lcd_display_on(void)
+void    lcd_display_on(LCD_handler *handler)
 {
-    handler.displaycontrol |= LCD_DISPLAYON;
-    lcd_command(LCD_DISPLAYCONTROL | handler.displaycontrol);
+    handler->displaycontrol |= LCD_DISPLAYON;
+    lcd_command(handler, LCD_DISPLAYCONTROL | handler->displaycontrol);
 }
 
-void    lcd_cursor_off(void)
+void    lcd_cursor_off(LCD_handler *handler)
 {
-    handler.displaycontrol &= ~LCD_CURSORON;
-    lcd_command(LCD_DISPLAYCONTROL | handler.displaycontrol);
+    handler->displaycontrol &= ~LCD_CURSORON;
+    lcd_command(handler, LCD_DISPLAYCONTROL | handler->displaycontrol);
 }
 
-void    lcd_cursor_on(void)
+void    lcd_cursor_on(LCD_handler *handler)
 {
-    handler.displaycontrol |= LCD_CURSORON;
-    lcd_command(LCD_DISPLAYCONTROL | handler.displaycontrol);
+    handler->displaycontrol |= LCD_CURSORON;
+    lcd_command(handler, LCD_DISPLAYCONTROL | handler->displaycontrol);
 }
 
-void    lcd_blink_off(void)
+void    lcd_blink_off(LCD_handler *handler)
 {
-    handler.displaycontrol &= ~LCD_BLINKON;
-    lcd_command(LCD_DISPLAYCONTROL | handler.displaycontrol);
+    handler->displaycontrol &= ~LCD_BLINKON;
+    lcd_command(handler, LCD_DISPLAYCONTROL | handler->displaycontrol);
 }
 
-void    lcd_blink_on(void)
+void    lcd_blink_on(LCD_handler *handler)
 {
-    handler.displaycontrol |= LCD_BLINKON;
-    lcd_command(LCD_DISPLAYCONTROL | handler.displaycontrol);
+    handler->displaycontrol |= LCD_BLINKON;
+    lcd_command(handler, LCD_DISPLAYCONTROL | handler->displaycontrol);
 }
 
-void    lcd_scroll_display_left(void)
+void    lcd_scroll_display_left(LCD_handler *handler)
 {
-    lcd_command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
+    lcd_command(handler, LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
 }
 
-void    lcd_scroll_display_right(void)
+void    lcd_scroll_display_right(LCD_handler *handler)
 {
-    lcd_command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
+    lcd_command(handler, LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
 }
 
-void    lcd_left_to_right(void)
+void    lcd_left_to_right(LCD_handler *handler)
 {
-    handler.displaymode |= LCD_ENTRYLEFT;
-    lcd_command(LCD_ENTRYMODESET | handler.displaymode);
+    handler->displaymode |= LCD_ENTRYLEFT;
+    lcd_command(handler, LCD_ENTRYMODESET | handler->displaymode);
 }
 
-void    lcd_right_to_left(void)
+void    lcd_right_to_left(LCD_handler *handler)
 {
-    handler.displaymode &= ~LCD_ENTRYLEFT;
-    lcd_command(LCD_ENTRYMODESET | handler.displaymode);
+    handler->displaymode &= ~LCD_ENTRYLEFT;
+    lcd_command(handler, LCD_ENTRYMODESET | handler->displaymode);
 }
 
-void    lcd_autoscroll_on(void)
+void    lcd_autoscroll_on(LCD_handler *handler)
 {
-    handler.displaymode |= LCD_ENTRYSHIFTINCREMENT;
-    lcd_command(LCD_ENTRYMODESET | handler.displaymode);
+    handler->displaymode |= LCD_ENTRYSHIFTINCREMENT;
+    lcd_command(handler, LCD_ENTRYMODESET | handler->displaymode);
 }
 
-void    lcd_autoscroll_off(void)
+void    lcd_autoscroll_off(LCD_handler *handler)
 {
-    handler.displaymode &= ~LCD_ENTRYSHIFTINCREMENT;
-    lcd_command(LCD_ENTRYMODESET | handler.displaymode);
+    handler->displaymode &= ~LCD_ENTRYSHIFTINCREMENT;
+    lcd_command(handler, LCD_ENTRYMODESET | handler->displaymode);
 }
 
-void    lcd_create_char(uint8_t location, uint8_t charmap[])
+void    lcd_create_char(LCD_handler *handler, uint8_t location, uint8_t charmap[])
 {
     location &= 0x7; // we only have 8 locations 0-7
-    lcd_command(LCD_SETCGRAMADDR | (location << 3));
+    lcd_command(handler, LCD_SETCGRAMADDR | (location << 3));
     for (int i = 0; i < 8; i++)
-        lcd_write(charmap[i]);
+        lcd_write(handler, charmap[i]);
 }
 
-void    lcd_command(uint8_t value)
+void    lcd_write(LCD_handler *handler, char value)
 {
-    gpio_set(GPIOA, handler.rs_pin, 0);
-    write4bits(value >> 4);
-    write4bits(value);
+    gpio_set(handler->rs_pin, 1);
+    write4bits(handler, value >> 4);
+    write4bits(handler, value);
 }
 
-void    lcd_write(char value)
+void    writer_lcd_write(writer *self, const char buf[], size_t len)
 {
-    gpio_set(GPIOA, handler.rs_pin, 1);
-    write4bits(value >> 4);
-    write4bits(value);
+    for (size_t i = 0; i < len; i++)
+        lcd_write((LCD_handler *)self->data, buf[i]);
 }
 
-void    lcd_init(void)
+writer *lcd_writer(LCD_handler *handler)
 {
-    handler.rs_pin = 9;
-    handler.enable_pin = 7;
-    handler.data_pins[0] = 5;
-    handler.data_pins[1] = 4;
-    handler.data_pins[2] = 10;
-    handler.data_pins[3] = 8;
-    handler.numlines = 1;
-    handler.row_offsets[0] = 0;
-    handler.row_offsets[1] = 64;
-    handler.row_offsets[2] = 16;
-    handler.row_offsets[3] = 64 + 16;
-    handler.displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
+    writer *res = (writer*)malloc(sizeof(writer));
+    if (!res)
+        return (NULL);
 
-    GPIO_config gpio_config = {
-        .pin = handler.rs_pin,
+    res->write = &writer_lcd_write;
+    res->data = handler;
+    return (res);
+}
+
+void    lcd_init(LCD_handler *handler)
+{
+    handler->numlines = 1;
+    handler->row_offsets[0] = 0;
+    handler->row_offsets[1] = 64;
+    handler->row_offsets[2] = 16;
+    handler->row_offsets[3] = 64 + 16;
+    handler->displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
+
+    GPIO_config rs_pin = {
+        .pin = handler->rs_pin->pin,
         .mode = GPIO_MODE_OUTPUT,
         .pull = GPIO_NO_PUPD,
         .speed = GPIO_SPEED_LOW,
     };
-    gpio_init(GPIOA, &gpio_config);
-    gpio_config.pin = handler.enable_pin;
-    gpio_init(GPIOC, &gpio_config);
-    gpio_config.pin = handler.data_pins[0];
-    gpio_init(GPIOB, &gpio_config);
-    gpio_config.pin = handler.data_pins[1];
-    gpio_init(GPIOB, &gpio_config);
-    gpio_config.pin = handler.data_pins[2];
-    gpio_init(GPIOB, &gpio_config);
-    gpio_config.pin = handler.data_pins[3];
-    gpio_init(GPIOA, &gpio_config);
+    gpio_init(handler->rs_pin->group, &rs_pin);
 
-    DELAY
+    GPIO_config enable_pin = {
+        .pin = handler->enable_pin->pin,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull = GPIO_NO_PUPD,
+        .speed = GPIO_SPEED_LOW,
+    };
+    gpio_init(handler->enable_pin->group, &enable_pin);
 
-    gpio_set(GPIOA, handler.rs_pin, 0);
-    gpio_set(GPIOC, handler.enable_pin, 0);
+    GPIO_config data_pins_0 = {
+        .pin = handler->data_pins[0]->pin,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull = GPIO_NO_PUPD,
+        .speed = GPIO_SPEED_LOW,
+    };
+    gpio_init(handler->data_pins[0]->group, &data_pins_0);
 
-    write4bits(0x03);
-    DELAY
+    GPIO_config data_pins_1 = {
+        .pin = handler->data_pins[1]->pin,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull = GPIO_NO_PUPD,
+        .speed = GPIO_SPEED_LOW,
+    };
+    gpio_init(handler->data_pins[1]->group, &data_pins_1);
+
+    GPIO_config data_pins_2 = {
+        .pin = handler->data_pins[2]->pin,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull = GPIO_NO_PUPD,
+        .speed = GPIO_SPEED_LOW,
+    };
+    gpio_init(handler->data_pins[2]->group, &data_pins_2);
+
+    GPIO_config data_pins_3 = {
+        .pin = handler->data_pins[3]->pin,
+        .mode = GPIO_MODE_OUTPUT,
+        .pull = GPIO_NO_PUPD,
+        .speed = GPIO_SPEED_LOW,
+    };
+    gpio_init(handler->data_pins[3]->group, &data_pins_3);
+
+    delay();
+
+    gpio_set(handler->rs_pin, 0);
+    gpio_set(handler->enable_pin, 0);
+
+    // Set inital configuration, repeat 3 times, as described in the datasheet
+    write4bits(handler, LCD_8BIT_1LINE_5x8DOTS);
+    delay();
 
     // second try
-    write4bits(0x03);
-    DELAY
+    write4bits(handler, LCD_8BIT_1LINE_5x8DOTS);
+    delay();
 
     // third go!
-    write4bits(0x03);
-    DELAY
+    write4bits(handler, LCD_8BIT_1LINE_5x8DOTS);
+    delay();
 
     // finally, set to 4-bit interface
-    write4bits(0x02);
+    write4bits(handler, LCD_4BIT_INIT);
 
-    // finally, set # lines, font size, etc.
-    lcd_command(LCD_FUNCTIONSET | handler.displayfunction);
+    // finally, set number of lines, font size, etc.
+    lcd_command(handler, LCD_FUNCTIONSET | handler->displayfunction);
 
     // turn the display on with no cursor or blinking default
-    handler.displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
-    lcd_display_on();
+    handler->displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
+    lcd_display_on(handler);
 
     // clear it off
-    lcd_clear();
+    lcd_clear(handler);
 
     // Initialize to default text direction (for romance languages)
-    handler.displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
+    handler->displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
     // set the entry mode
-    lcd_command(LCD_ENTRYMODESET | handler.displaymode);
+    lcd_command(handler, LCD_ENTRYMODESET | handler->displaymode);
 }
