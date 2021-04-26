@@ -15,6 +15,8 @@ static inline uint32_t set_bits_with_offset(uint32_t field, unsigned int offset,
     return (temp);
 }
 
-void   *memset(void *s, int c, size_t n);
+void *memset(void *s, int c, size_t n);
+
+size_t strlen(const char *s);
 
 #endif

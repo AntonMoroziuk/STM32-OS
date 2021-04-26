@@ -8,46 +8,29 @@
 #include "asm.h"
 #include "task.h"
 #include "lcd.h"
+#include "printf.h"
 
 void test_lcd(void)
 {
-    GPIO_pin enable_pin = {
-        .pin = GPIO_PIN_7,
-        .group = GPIOC,
+    LCD_config lcd_config = {
+        .enable_pin = {GPIO_PIN_7, GPIOC},
+        .rs_pin = {GPIO_PIN_9, GPIOA},
+        .data_pins[0] = {GPIO_PIN_5, GPIOB},
+        .data_pins[1] = {GPIO_PIN_4, GPIOB},
+        .data_pins[2] = {GPIO_PIN_10, GPIOB},
+        .data_pins[3] = {GPIO_PIN_8, GPIOA},
     };
-    GPIO_pin rs_pin = {
-        .pin = GPIO_PIN_9,
-        .group = GPIOA,
-    };
-    GPIO_pin data_pin_0 = {
-        .pin = GPIO_PIN_5,
-        .group = GPIOB,
-    };
-    GPIO_pin data_pin_1 = {
-        .pin = GPIO_PIN_4,
-        .group = GPIOB,
-    };
-    GPIO_pin data_pin_2 = {
-        .pin = GPIO_PIN_10,
-        .group = GPIOB,
-    };
-    GPIO_pin data_pin_3 = {
-        .pin = GPIO_PIN_8,
-        .group = GPIOA,
-    };
+    LCD_handler *lcd_handler = lcd_init(&lcd_config);
+    if (!lcd_handler)
+        return ;
 
-    LCD_handler lcd_handler = {
-        .enable_pin = &enable_pin,
-        .rs_pin = &rs_pin,
-        .data_pins[0] = &data_pin_0,
-        .data_pins[1] = &data_pin_1,
-        .data_pins[2] = &data_pin_2,
-        .data_pins[3] = &data_pin_3,
-    };
-    lcd_init(&lcd_handler);
-    writer *stream = lcd_writer(&lcd_handler);
+    writer *stream = lcd_writer(lcd_handler);
+    if (!stream)
+        return ;
+
     printf(stream, "Hello world! %d", 5);
-    free(stream);
+    lcd_delete_writer(stream);
+    lcd_deinit(lcd_handler);
 }
 
 void recursive(int step)
@@ -119,11 +102,8 @@ int main()
 
     gpio_init(GPIOA, &PA5_config);
 
-    GPIO_pin LED = {
-        .pin = GPIO_PIN_5,
-        .group = GPIOA,
-    };
-    gpio_set(&LED, (uint8_t)1);
+    // Enable LED
+    gpio_set((GPIO_pin){GPIO_PIN_5, GPIOA}, (uint8_t)1);
 
     UART_config uart_config = {
         .word_length = EIGHT_BITS,

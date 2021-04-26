@@ -11,7 +11,7 @@ static uint32_t *tasks[TASK_LIMIT];
 static uint32_t *stacks[TASK_LIMIT];
 static int      cur_task;
 
-void    task_delete()
+void task_delete(void)
 {
     uint32_t *temp = tasks[cur_task];
 
@@ -26,7 +26,7 @@ void    task_delete()
     exit();
 }
 
-int     task_add(void (*task_code)(void), size_t stack_size)
+int task_add(void (*task_code)(void), size_t stack_size)
 {
     int i = 0;
 
@@ -49,7 +49,7 @@ int     task_add(void (*task_code)(void), size_t stack_size)
     return (0);
 }
 
-void    task_scheduler(void)
+void task_scheduler(void)
 {
     while(1)
     {

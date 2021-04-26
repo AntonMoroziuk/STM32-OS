@@ -30,12 +30,12 @@ void rcc_init_clocks(void)
     RCC->CFGR3 = set_bits_with_offset(RCC->CFGR3, 16, 2, 0);
 }
 
-void    rcc_gpio_set(IO_PORT io_port, uint8_t enable)
+void rcc_gpio_set(IO_PORT io_port, uint8_t enable)
 {
     RCC->AHBENR = set_bits_with_offset(RCC->AHBENR, io_port, 1, enable ? 1 : 0);
 }
 
-void    rcc_uart_set(UART_PORT uart_port, uint8_t enable)
+void rcc_uart_set(UART_PORT uart_port, uint8_t enable)
 {
     switch (uart_port)
     {

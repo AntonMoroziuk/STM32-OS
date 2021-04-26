@@ -8,6 +8,8 @@ CCFLAGS	= 	-Wall \
 
 LDFLAGS	= 	-T flash.ld \
 			-mthumb \
+			-lgcc \
+			-nostdlib \
 			-nostartfiles \
 			-g \
 			-mcpu=cortex-m0
@@ -33,7 +35,8 @@ HEADERS_N =	gpio.h \
 			malloc.h \
 			task.h \
 			lcd.h \
-			printf.h
+			printf.h \
+			writer.h
 
 SRC_P 	= ./src/
 ASM		= $(addprefix $(SRC_P), $(ASM_N))
@@ -54,7 +57,7 @@ $(OBJ_P)%.o: $(SRC_P)%.c $(HEADERS)
 	$(CC) $(CCFLAGS) -I $(INC_P) -o $@ -c $<
 
 $(NAME): $(OBJ) $(ASM) flash.ld
-	$(CC) $(LDFLAGS) $(OBJ) -o $(NAME) $(ASM)
+	$(CC) $(OBJ) -o $(NAME) $(ASM) $(LDFLAGS)
 
 clean:
 	rm -rf $(OBJ_P)

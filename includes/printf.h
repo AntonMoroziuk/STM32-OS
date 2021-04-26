@@ -1,13 +1,9 @@
 #ifndef PRINTF_H
 #define PRINTF_H
 
-#include <stddef.h>
+#include "writer.h"
 
-typedef struct  writer_s
-{
-    void (*write)(struct writer_s *self, const char buf[], size_t len);
-    void *data;
-}               writer;
+#include <stddef.h>
 
 void printf(writer *wrt, const char *format, ...);
 

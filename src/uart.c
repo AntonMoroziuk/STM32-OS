@@ -1,7 +1,7 @@
 #include "uart.h"
 #include "utils.h"
 #include "gpio.h"
-#include "printf.h"
+#include "writer.h"
 #include "malloc.h"
 
 /* CR1 register bit offsets */
@@ -19,48 +19,30 @@
 #define TC_OFFSET       (6)
 #define TXE_OFFSET      (7)
 
-void    uart_configure(UART_t *uart, UART_config *config)
+void uart_configure(UART_t *uart, UART_config *config)
 {
     // TODO: add all UART ports
     if (uart == UART1)
     {
-        GPIO_pin clk = {
-            .pin = GPIO_PIN_8,
-            .group = GPIOA,
-        };
-        gpio_select_alternate_function(&clk, AF1);
+        // Clock
+        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_8, GPIOA}, AF1);
 
-        GPIO_pin tx = {
-            .pin = GPIO_PIN_9,
-            .group = GPIOA,
-        };
-        gpio_select_alternate_function(&tx, AF1);
+        // RX
+        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_9, GPIOA}, AF1);
 
-        GPIO_pin rx = {
-            .pin = GPIO_PIN_10,
-            .group = GPIOA,
-        };
-        gpio_select_alternate_function(&rx, AF1);
+        // TX
+        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_10, GPIOA}, AF1);
     }
     else if (uart == UART2)
     {
-        GPIO_pin tx = {
-            .pin = GPIO_PIN_2,
-            .group = GPIOA,
-        };
-        gpio_select_alternate_function(&tx, AF1);
+        // TX
+        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_2, GPIOA}, AF1);
 
-        GPIO_pin rx = {
-            .pin = GPIO_PIN_3,
-            .group = GPIOA,
-        };
-        gpio_select_alternate_function(&rx, AF1);
+        // RX
+        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_3, GPIOA}, AF1);
 
-        GPIO_pin clk = {
-            .pin = GPIO_PIN_4,
-            .group = GPIOA,
-        };
-        gpio_select_alternate_function(&clk, AF1);
+        // Clock
+        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_4, GPIOA}, AF1);
     }
 
     /* Disable UART */
@@ -91,7 +73,7 @@ void    uart_configure(UART_t *uart, UART_config *config)
     uart->CR1 = set_bits_with_offset(uart->CR1, UE_OFFSET, 1, 1);
 }
 
-void    uart_write(UART_t *uart, const char buf[], size_t len)
+void uart_write(UART_t *uart, const char buf[], size_t len)
 {
     for (size_t i = 0; i < len; i++)
     {
@@ -104,7 +86,7 @@ void    uart_write(UART_t *uart, const char buf[], size_t len)
     while (!(uart->ISR & (1 << TC_OFFSET))) ;
 }
 
-void    uart_read(UART_t *uart, char buf[], size_t len)
+void uart_read(UART_t *uart, char buf[], size_t len)
 {
     for (size_t i = 0; i < len; i++)
     {
@@ -129,4 +111,9 @@ writer *uart_writer(UART_t *uart)
     res->write = &writer_uart_write;
     res->data = uart;
     return (res);
+}
+
+void uart_delete_writer(writer *to_delete)
+{
+    free(to_delete);
 }

@@ -23,7 +23,7 @@ static void *split_block(block_header *block, size_t size)
     return ((void*)block->data);
 }
 
-static void  malloc_init(void)
+static void malloc_init(void)
 {
     g_malloc = (block_header *)HEAP_START;
     g_malloc->prev = NULL;
@@ -75,7 +75,7 @@ static void defragment(block_header *ptr)
     defragment_forward(ptr);
 }
 
-void        *malloc(size_t size)
+void *malloc(size_t size)
 {
     size = ALIGN(size);
     if (!g_malloc)
@@ -87,7 +87,7 @@ void        *malloc(size_t size)
     return (NULL);
 }
 
-void    free(void *ptr)
+void free(void *ptr)
 {
     block_header  *temp;
 

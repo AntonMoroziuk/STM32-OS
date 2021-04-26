@@ -20,9 +20,9 @@ typedef struct RCC_s
 }              RCC_t;
 
 /* RCC object */
-#define RCC             ((RCC_t *)0x40021000U)
+#define RCC ((RCC_t *)0x40021000U)
 
-typedef enum    IO_PORT_e
+typedef enum IO_PORT_e
 {
     A = 17,
     B,
@@ -30,9 +30,9 @@ typedef enum    IO_PORT_e
     D,
     E,
     F,
-}               IO_PORT;
+} IO_PORT;
 
-typedef enum    UART_PORT_e
+typedef enum UART_PORT_e
 {
     UART_PORT_1 = 14,
     UART_PORT_2 = 17,
@@ -42,10 +42,10 @@ typedef enum    UART_PORT_e
     UART_PORT_6 = 5,
     UART_PORT_7 = 6,
     UART_PORT_8 = 7
-}               UART_PORT;
+} UART_PORT;
 
-void    rcc_init_clocks(void);
-void    rcc_gpio_set(IO_PORT io_port, uint8_t enable);
-void    rcc_uart_set(UART_PORT uart_port, uint8_t enable);
+void rcc_init_clocks(void);
+void rcc_gpio_set(IO_PORT io_port, uint8_t enable);
+void rcc_uart_set(UART_PORT uart_port, uint8_t enable);
 
 #endif

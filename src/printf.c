@@ -1,6 +1,8 @@
 #include "printf.h"
 #include "uart.h"
 #include "lcd.h"
+#include "writer.h"
+#include "utils.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -12,8 +14,7 @@ static void putchar(writer *stream, char c)
 
 static void putstr(writer *stream, char *str)
 {
-    for (int i = 0; str[i]; i++)
-        putchar(stream, str[i]);
+    stream->write(stream, str, strlen(str));
 }
 
 static void putnbr(writer *stream, int n)
@@ -52,9 +53,15 @@ static void puthex(writer *stream, uint32_t n)
     }
 }
 
-void     printf(writer *stream, const char *format, ...)
+typedef enum STATE_e
 {
-    int state = 0;
+    DEFAULT,
+    FOUND_PERCENT,
+} STATE;
+
+void printf(writer *stream, const char *format, ...)
+{
+    STATE state = DEFAULT;
     va_list args;
 
     va_start(args, format);
@@ -62,40 +69,40 @@ void     printf(writer *stream, const char *format, ...)
     // Based on finite automata, 0 - default state, 1 - found percent
     for (int i = 0; format[i]; i++)
     {
-        if (!state && format[i] != '%')
+        if (state == DEFAULT && format[i] != '%')
             putchar(stream, format[i]);
-        else if (state == 1)
+        else if (state == FOUND_PERCENT)
         {
             switch (format[i])
             {
                 case '%':
                     putchar(stream, '%');
-                    state = 0;
+                    state = DEFAULT;
                     break ;
                 case 'd':
                     putnbr(stream, (int)va_arg(args, int));
-                    state = 0;
+                    state = DEFAULT;
                     break ;
                 case 'c':
                     putchar(stream, (char)va_arg(args, int));
-                    state = 0;
+                    state = DEFAULT;
                     break ;
                 case 's':
                     putstr(stream, va_arg(args, char *));
-                    state = 0;
+                    state = DEFAULT;
                     break ;
                 case 'p':
                     putstr(stream, "0x");
                     puthex(stream, (uint32_t)va_arg(args, void *));
-                    state = 0;
+                    state = DEFAULT;
                     break ;
                 default:
                     // We get here only in case of bad usage, just ignoring
-                    state = 0;
+                    state = DEFAULT;
             }
         }
         else
-            state = 1;
+            state = FOUND_PERCENT;
     }
     va_end(args);
 }
