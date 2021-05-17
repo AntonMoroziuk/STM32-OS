@@ -18,6 +18,11 @@ void    gpio_set(GPIO_pin gpio, uint8_t value)
         gpio.port->BSRR = 1 << (gpio.pin + 16);
 }
 
+int gpio_read(GPIO_pin gpio)
+{
+    return ((gpio.port->IDR & (1 << gpio.pin)) > 0);
+}
+
 void    gpio_select_alternate_function(GPIO_pin gpio, uint8_t function)
 {
     const uint8_t offset = (gpio.pin % 8) * 4;

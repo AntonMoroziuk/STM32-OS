@@ -25,24 +25,24 @@ void uart_configure(UART_t *uart, UART_config *config)
     if (uart == UART1)
     {
         // Clock
-        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_8, GPIOA}, AF1);
+        gpio_select_alternate_function((GPIO_pin){GPIOA, GPIO_PIN_8}, AF1);
 
         // RX
-        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_9, GPIOA}, AF1);
+        gpio_select_alternate_function((GPIO_pin){GPIOA, GPIO_PIN_9}, AF1);
 
         // TX
-        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_10, GPIOA}, AF1);
+        gpio_select_alternate_function((GPIO_pin){GPIOA, GPIO_PIN_10}, AF1);
     }
     else if (uart == UART2)
     {
         // TX
-        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_2, GPIOA}, AF1);
+        gpio_select_alternate_function((GPIO_pin){GPIOA, GPIO_PIN_2}, AF1);
 
         // RX
-        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_3, GPIOA}, AF1);
+        gpio_select_alternate_function((GPIO_pin){GPIOA, GPIO_PIN_3}, AF1);
 
         // Clock
-        gpio_select_alternate_function((GPIO_pin){GPIO_PIN_4, GPIOA}, AF1);
+        gpio_select_alternate_function((GPIO_pin){GPIOA, GPIO_PIN_4}, AF1);
     }
 
     /* Disable UART */
@@ -97,7 +97,7 @@ void uart_read(UART_t *uart, char buf[], size_t len)
     }
 }
 
-static void writer_uart_write(writer *self, const char buf[], size_t len)
+static void writer_uart_write(const writer *self, const char buf[], size_t len)
 {
     uart_write((UART_t *)self->data, buf, len);
 }

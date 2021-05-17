@@ -2,6 +2,7 @@
 #include "gpio.h"
 #include "writer.h"
 #include "malloc.h"
+#include "tim.h"
 
 #include <string.h>
 #include <stdint.h>
@@ -62,19 +63,14 @@ typedef struct LCD_handler_s
     uint8_t     row_offsets[4];
 } LCD_handler;
 
-static inline void delay(void)
-{
-    for (volatile int i = 0; i < 10000; i++) ;
-}
-
 static void pulse_enable(LCD_handler *handler)
 {
     gpio_set(handler->enable_pin, 0);
-    delay();
+    delay_microseconds(1);
     gpio_set(handler->enable_pin, 1);
-    delay();
+    delay_microseconds(1);
     gpio_set(handler->enable_pin, 0);
-    delay();
+    delay_microseconds(100);
 }
 
 static void write4bits(LCD_handler *handler, uint8_t value)
@@ -97,13 +93,13 @@ static void lcd_command(LCD_handler *handler, uint8_t value)
 void lcd_clear(LCD_handler *handler)
 {
     lcd_command(handler, LCD_CLEARDISPLAY);
-    delay();
+    delay_microseconds(2000);
 }
 
 void lcd_home(LCD_handler *handler)
 {
     lcd_command(handler, LCD_RETURNHOME);
-    delay();
+    delay_microseconds(2000);
 }
 
 void lcd_set_cursor(LCD_handler *handler, uint8_t col, uint8_t row)
@@ -202,7 +198,7 @@ void lcd_write(LCD_handler *handler, char value)
     write4bits(handler, value);
 }
 
-void writer_lcd_write(writer *self, const char buf[], size_t len)
+static void writer_lcd_write(const writer *self, const char buf[], size_t len)
 {
     for (size_t i = 0; i < len; i++)
         lcd_write((LCD_handler *)self->data, buf[i]);
@@ -303,22 +299,22 @@ LCD_handler *lcd_init(LCD_config *config)
     };
     gpio_init(handler->data_pins[3].port, &data_pins_3);
 
-    delay();
+    delay_miliseconds(50);
 
     gpio_set(handler->rs_pin, 0);
     gpio_set(handler->enable_pin, 0);
 
     // Set inital configuration, repeat 3 times, as described in the datasheet
     write4bits(handler, LCD_8BIT_1LINE_5x8DOTS);
-    delay();
+    delay_microseconds(4500);
 
     // second try
     write4bits(handler, LCD_8BIT_1LINE_5x8DOTS);
-    delay();
+    delay_microseconds(4500);
 
     // third go!
     write4bits(handler, LCD_8BIT_1LINE_5x8DOTS);
-    delay();
+    delay_microseconds(150);
 
     // finally, set to 4-bit interface
     write4bits(handler, LCD_4BIT_INIT);

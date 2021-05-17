@@ -29,8 +29,8 @@ typedef struct GPIO_config_s
 
 typedef struct GPIO_pin_s
 {
-    uint32_t   pin;
     GPIO       *port;
+    uint32_t   pin;
 } GPIO_pin;
 
 /* GPIO_MODER possible values */
@@ -93,5 +93,6 @@ typedef struct GPIO_pin_s
 void gpio_init(GPIO *GPIOx, GPIO_config *GPIO_init);
 void gpio_select_alternate_function(GPIO_pin gpio, uint8_t function);
 void gpio_set(GPIO_pin gpio, uint8_t value);
+int gpio_read(GPIO_pin gpio);
 
 #endif

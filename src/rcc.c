@@ -16,9 +16,6 @@
 
 void rcc_init_clocks(void)
 {
-    /* Lower HSI frequency */
-    RCC->CR = set_bits_with_offset(RCC->CR, HSITRIM_OFFSET, 5, 10);
-
     /* Enable HSI oscillator */
     RCC->CR = set_bits_with_offset(RCC->CR, HSION_OFFSET, 1, 1);
 
@@ -50,6 +47,26 @@ void rcc_uart_set(UART_PORT uart_port, uint8_t enable)
         case UART_PORT_4:
         case UART_PORT_5:
             RCC->APB1ENR = set_bits_with_offset(RCC->APB1ENR, uart_port, 1, enable ? 1 : 0);
+            break ;
+    }
+}
+
+void rcc_tim_set(RCC_TIM tim, uint8_t enable)
+{
+    switch (tim)
+    {
+        case RCC_TIM2:
+        case RCC_TIM3:
+        case RCC_TIM6:
+        case RCC_TIM7:
+        case RCC_TIM14:
+            RCC->APB1ENR = set_bits_with_offset(RCC->APB1ENR, tim, 1, enable ? 1 : 0);
+            break ;
+        case RCC_TIM1:
+        case RCC_TIM15:
+        case RCC_TIM16:
+        case RCC_TIM17:
+            RCC->APB2ENR = set_bits_with_offset(RCC->APB2ENR, tim, 1, enable ? 1 : 0);
             break ;
     }
 }

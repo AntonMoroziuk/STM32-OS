@@ -7,17 +7,17 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-static void putchar(writer *stream, char c)
+static void putchar(const writer *stream, const char c)
 {
     stream->write(stream, &c, 1);
 }
 
-static void putstr(writer *stream, char *str)
+static void putstr(const writer *stream, const char *str)
 {
     stream->write(stream, str, strlen(str));
 }
 
-static void putnbr(writer *stream, int n)
+static void putnbr(const writer *stream, const int n)
 {
     if (n < 0)
     {
@@ -37,7 +37,7 @@ static void putnbr(writer *stream, int n)
     }
 }
 
-static void puthex(writer *stream, uint32_t n)
+static void puthex(const writer *stream, const uint32_t n)
 {
     if (n > 15)
     {
@@ -55,54 +55,122 @@ static void puthex(writer *stream, uint32_t n)
 
 typedef enum STATE_e
 {
-    DEFAULT,
-    FOUND_PERCENT,
+    STATE_DEFAULT,
+    STATE_FOUND_PERCENT,
 } STATE;
 
-void printf(writer *stream, const char *format, ...)
+void fprintf(const writer *stream, const char *format, ...)
 {
-    STATE state = DEFAULT;
+    STATE state = STATE_DEFAULT;
     va_list args;
 
     va_start(args, format);
 
-    // Based on finite automata, 0 - default state, 1 - found percent
     for (int i = 0; format[i]; i++)
     {
-        if (state == DEFAULT && format[i] != '%')
-            putchar(stream, format[i]);
-        else if (state == FOUND_PERCENT)
+        if (state == STATE_DEFAULT)
+        {
+            if (format[i] == '%')
+                state = STATE_FOUND_PERCENT;
+            else
+                putchar(stream, format[i]);
+        }
+        else
         {
             switch (format[i])
             {
                 case '%':
                     putchar(stream, '%');
-                    state = DEFAULT;
+                    state = STATE_DEFAULT;
                     break ;
                 case 'd':
                     putnbr(stream, (int)va_arg(args, int));
-                    state = DEFAULT;
+                    state = STATE_DEFAULT;
                     break ;
                 case 'c':
                     putchar(stream, (char)va_arg(args, int));
-                    state = DEFAULT;
+                    state = STATE_DEFAULT;
                     break ;
                 case 's':
                     putstr(stream, va_arg(args, char *));
-                    state = DEFAULT;
+                    state = STATE_DEFAULT;
                     break ;
                 case 'p':
                     putstr(stream, "0x");
                     puthex(stream, (uint32_t)va_arg(args, void *));
-                    state = DEFAULT;
+                    state = STATE_DEFAULT;
                     break ;
                 default:
                     // We get here only in case of bad usage, just ignoring
-                    state = DEFAULT;
+                    state = STATE_DEFAULT;
             }
         }
+    }
+    va_end(args);
+}
+
+void printf(const char *format, ...)
+{
+    STATE state = STATE_DEFAULT;
+    va_list args;
+    static writer* stream;
+
+    if (!stream)
+    {
+        UART_config uart_config = {
+            .word_length = EIGHT_BITS,
+            .baud_rate = DEFAULT_BRR_VALUE,
+            .stop_bits = ONE_BIT,
+        };
+        uart_configure(UART2, &uart_config);
+
+        stream = uart_writer(UART2);
+
+        if (!stream)
+            return ;
+    }
+
+    va_start(args, format);
+
+    for (int i = 0; format[i]; i++)
+    {
+        if (state == STATE_DEFAULT)
+        {
+            if (format[i] == '%')
+                state = STATE_FOUND_PERCENT;
+            else
+                putchar(stream, format[i]);
+        }
         else
-            state = FOUND_PERCENT;
+        {
+            switch (format[i])
+            {
+                case '%':
+                    putchar(stream, '%');
+                    state = STATE_DEFAULT;
+                    break ;
+                case 'd':
+                    putnbr(stream, (int)va_arg(args, int));
+                    state = STATE_DEFAULT;
+                    break ;
+                case 'c':
+                    putchar(stream, (char)va_arg(args, int));
+                    state = STATE_DEFAULT;
+                    break ;
+                case 's':
+                    putstr(stream, va_arg(args, char *));
+                    state = STATE_DEFAULT;
+                    break ;
+                case 'p':
+                    putstr(stream, "0x");
+                    puthex(stream, (uint32_t)va_arg(args, void *));
+                    state = STATE_DEFAULT;
+                    break ;
+                default:
+                    // We get here only in case of bad usage, just ignoring
+                    state = STATE_DEFAULT;
+            }
+        }
     }
     va_end(args);
 }

@@ -17,7 +17,7 @@ typedef struct RCC_s
     volatile uint32_t    CFGR2;     /* Clock configuration register 2,          Address offset 0x2c */
     volatile uint32_t    CFGR3;     /* Clock configuration register 3,          Address offset 0x30 */
     volatile uint32_t    CR2;       /* Clock control register 2,                Address offset 0x34 */
-}              RCC_t;
+} RCC_t;
 
 /* RCC object */
 #define RCC ((RCC_t *)0x40021000U)
@@ -41,11 +41,25 @@ typedef enum UART_PORT_e
     UART_PORT_5 = 20,
     UART_PORT_6 = 5,
     UART_PORT_7 = 6,
-    UART_PORT_8 = 7
+    UART_PORT_8 = 7,
 } UART_PORT;
+
+typedef enum RCC_TIM_e
+{
+    RCC_TIM1 = 11,
+    RCC_TIM2 = 0,
+    RCC_TIM3 = 1,
+    RCC_TIM6 = 4,
+    RCC_TIM7 = 5,
+    RCC_TIM14 = 8,
+    RCC_TIM15 = 16,
+    RCC_TIM16 = 17,
+    RCC_TIM17 = 18,
+} RCC_TIM;
 
 void rcc_init_clocks(void);
 void rcc_gpio_set(IO_PORT io_port, uint8_t enable);
 void rcc_uart_set(UART_PORT uart_port, uint8_t enable);
+void rcc_tim_set(RCC_TIM tim, uint8_t enable);
 
 #endif

@@ -5,6 +5,9 @@
 
 #include <stddef.h>
 
-void printf(writer *wrt, const char *format, ...);
+// printf initialises and uses UART2 as default output stream
+// however, it does not enable corresponding RCC
+void printf(const char *format, ...);
+void fprintf(const writer *wrt, const char *format, ...);
 
 #endif

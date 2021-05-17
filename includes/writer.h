@@ -5,7 +5,7 @@
 
 typedef struct  writer_s
 {
-    void (*write)(struct writer_s *self, const char buf[], size_t len);
+    void (*write)(const struct writer_s *self, const char buf[], size_t len);
     void *data;
 } writer;
 
