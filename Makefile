@@ -7,8 +7,9 @@ CCFLAGS	= 	-Wall \
 			-g
 
 LDFLAGS	= 	-T flash.ld \
-			-nostdlib \
 			-mthumb \
+			-lgcc \
+			-nostdlib \
 			-nostartfiles \
 			-g \
 			-mcpu=cortex-m0
@@ -20,7 +21,10 @@ SRC_N 	= 	reset_handler.c \
 			rcc.c \
 			uart.c \
 			malloc.c \
-			task.c
+			task.c \
+			lcd.c \
+			printf.c \
+			tim.c
 
 ASM_N 	=	context_switch.s
 
@@ -30,7 +34,11 @@ HEADERS_N =	gpio.h \
 			uart.h \
 			asm.h \
 			malloc.h \
-			task.h
+			task.h \
+			lcd.h \
+			printf.h \
+			writer.h \
+			tim.h
 
 SRC_P 	= ./src/
 ASM		= $(addprefix $(SRC_P), $(ASM_N))
@@ -51,7 +59,7 @@ $(OBJ_P)%.o: $(SRC_P)%.c $(HEADERS)
 	$(CC) $(CCFLAGS) -I $(INC_P) -o $@ -c $<
 
 $(NAME): $(OBJ) $(ASM) flash.ld
-	$(CC) $(LDFLAGS) $(OBJ) -o $(NAME) $(ASM)
+	$(CC) $(OBJ) -o $(NAME) $(ASM) $(LDFLAGS)
 
 clean:
 	rm -rf $(OBJ_P)

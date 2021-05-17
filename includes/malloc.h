@@ -17,7 +17,7 @@ extern uint32_t _estack;
 
 #define HEAP_SIZE  (RAM_END - (size_t)HEAP_START)
 
-typedef struct  block_header_s
+typedef struct block_header_s
 {
     size_t                  size;
     struct block_header_s   *next;
@@ -25,9 +25,9 @@ typedef struct  block_header_s
     int                     free;
     uint8_t                 data[];
 
-}               block_header;
+} block_header;
 
-void            *malloc(size_t size);
-void            free(void *ptr);
+void *malloc(size_t size);
+void free(void *ptr);
 
 #endif

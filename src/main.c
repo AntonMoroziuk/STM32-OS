@@ -7,92 +7,43 @@
 #include "malloc.h"
 #include "asm.h"
 #include "task.h"
+#include "lcd.h"
+#include "printf.h"
 
-void hello_world(void)
+void test_lcd(void)
 {
-    char buf[] = "Hello world!\r\n";
+    LCD_config lcd_config = {
+        .enable_pin = {GPIOC, GPIO_PIN_7},
+        .rs_pin = {GPIOA, GPIO_PIN_9},
+        .data_pins[0] = {GPIOB, GPIO_PIN_5},
+        .data_pins[1] = {GPIOB, GPIO_PIN_4},
+        .data_pins[2] = {GPIOB, GPIO_PIN_10},
+        .data_pins[3] = {GPIOA, GPIO_PIN_8},
+    };
+    LCD_handler *lcd_handler = lcd_init(&lcd_config);
+    if (!lcd_handler)
+        return ;
 
-    while (1)
-    {
-        uart_write(UART2, buf, 14);
-        yield();
-    }
-}
+    writer *stream = lcd_writer(lcd_handler);
+    if (!stream)
+        goto writer_init_fail;
 
-void dummy(void)
-{
+    fprintf(stream, "Hello world!");
+    printf("Hello world!");
 
-}
-
-void test3(void)
-{
-    char buf[] = "0\r\n";
-
-    for (int i = 0; i < 10; i++)
-    {
-        buf[0] = i + '0';
-        uart_write(UART2, buf, 3);
-        yield();
-    }
-}
-
-void recursive(int step)
-{
-    char buf1[] = "enter  \r\n";
-    char buf2[] = "exit  \r\n";
-    char buf[] = "yield\r\n";
-
-    buf1[6] = step + '0';
-    buf2[5] = step + '0';
-    uart_write(UART2, buf1, 9);
-    if (step)
-    {
-        recursive(step - 1);
-    }
-    else
-    {
-        uart_write(UART2, buf, 7);
-        yield();
-    }
-    uart_write(UART2, buf2, 8);
-}
-
-void test2(void)
-{
-    recursive(2);
-}
-
-void test1(void)
-{
-    char buf[] = "Hello world!\r\n";
-
-    uart_write(UART2, buf, 14);
-    task_add(&test1, 256);
-}
-
-void bye_world(void)
-{
-    char buf[] = "Bye!\r\n";
-
-    uart_write(UART2, buf, 6);
-    yield();
-
-    char buf1[] = "Kek!\r\n";
-
-    uart_write(UART2, buf1, 6);
-    yield();
-
-    char buf2[] = "Wtf!\r\n";
-
-    uart_write(UART2, buf2, 6);
-    yield();
+    lcd_delete_writer(stream);
+writer_init_fail:
+    lcd_deinit(lcd_handler);
 }
 
 int main()
 {
     rcc_init_clocks();
     rcc_gpio_set(A, 1);
+    rcc_gpio_set(B, 1);
+    rcc_gpio_set(C, 1);
     rcc_uart_set(UART_PORT_2, 1);
+    rcc_tim_set(RCC_TIM1, 1);
 
     GPIO_config PA5_config = {
         .pin = GPIO_PIN_5,
@@ -102,16 +53,12 @@ int main()
     };
 
     gpio_init(GPIOA, &PA5_config);
-    gpio_set(GPIOA, (uint8_t)5, (uint8_t)1);
 
-    UART_config uart_config = {
-        .word_length = EIGHT_BITS,
-        .baud_rate = DEFAULT_BRR_VALUE,
-        .stop_bits = ONE_BIT,
-    };
-    uart_configure(UART2, &uart_config);
+    // Enable LED
+    gpio_set((GPIO_pin){GPIOA, GPIO_PIN_5}, (uint8_t)1);
 
-    task_add(&test2, 256);
+    task_add(&test_lcd, 1024);
+
     task_scheduler();
 
     return (0);

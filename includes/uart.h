@@ -1,9 +1,11 @@
 #ifndef UART_H
 #define UART_H
 
+#include "writer.h"
+
 #include <unistd.h>
 
-typedef struct  UART_s
+typedef struct UART_s
 {
     volatile uint32_t    CR1;   /* Control register 1,                  Address offset 0x00 */
     volatile uint32_t    CR2;   /* Control register 2,                  Address offset 0x04 */
@@ -16,31 +18,31 @@ typedef struct  UART_s
     volatile uint32_t    ICR;   /* Interrupt flag clear register,       Address offset 0x20 */
     volatile uint32_t    RDR;   /* Receive data register,               Address offset 0x24 */
     volatile uint32_t    TDR;   /* Transmit data register,              Address offset 0x28 */
-}               UART_t;
+} UART_t;
 
-typedef enum    WORD_LENGTH_e
+typedef enum WORD_LENGTH_e
 {
     EIGHT_BITS,
     NINE_BITS,
     SEVEN_BITS,
-}               WORD_LENGTH;
+} WORD_LENGTH;
 
-typedef enum    STOP_BITS_e
+typedef enum STOP_BITS_e
 {
     ONE_BIT,
     HALF_BIT,
     TWO_BITS,
     ONE_AND_HALF_BIT,
-}               STOP_BITS;
+} STOP_BITS;
 
 #define DEFAULT_BRR_VALUE 0x34U
 
-typedef struct  UART_config_s
+typedef struct UART_config_s
 {
     WORD_LENGTH word_length;
     uint32_t    baud_rate;
     STOP_BITS   stop_bits;
-}               UART_config;
+} UART_config;
 
 /* UART objects */
 #define UART1            ((UART_t *)0x40013800U)
@@ -53,8 +55,10 @@ typedef struct  UART_config_s
 #define UART8            ((UART_t *)0x40011C00U)
 
 /* Note that configure function does not enable RCC */
-void    uart_configure(UART_t *uart, UART_config *config);
-void    uart_write(UART_t *uart, const char buf[], size_t len);
-void    uart_read(UART_t *uart, char buf[], size_t len);
+void uart_configure(UART_t *uart, UART_config *config);
+void uart_write(UART_t *uart, const char buf[], size_t len);
+void uart_read(UART_t *uart, char buf[], size_t len);
+writer  *uart_writer(UART_t *uart);
+void uart_delete_writer(writer *to_delete);
 
 #endif

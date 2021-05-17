@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef struct  GPIO_s
+typedef struct GPIO_s
 {
     volatile uint32_t    MODER;      /* GPIO mode register,                          Address offset 0x00 */
     volatile uint32_t    OTYPER;     /* GPIO output type register,                   Address offset 0x04 */
@@ -16,16 +16,22 @@ typedef struct  GPIO_s
     volatile uint32_t    AFRL;       /* GPIO alternate function low register,        Address offset 0x20 */
     volatile uint32_t    AFRH;       /* GPIO alternate function high register,       Address offset 0x24 */
     volatile uint32_t    BRR;        /* GPIO bit reset register register,            Address offset 0x28 */
-}               GPIO;
+} GPIO;
 
-typedef struct  GPIO_config_s
+typedef struct GPIO_config_s
 {
     uint32_t   mode;        /* Should be one of GPIO_MODER values */
     uint32_t   pin;         /* Pin number from 0 to 15 */
     uint32_t   pull;        /* Should be one of GPIO_PUPDR values */
     uint32_t   speed;       /* Should be one of GPIO_OSPEEDR values */
     uint32_t   alternate;   /* TODO: alternate options */
-}               GPIO_config;
+} GPIO_config;
+
+typedef struct GPIO_pin_s
+{
+    GPIO       *port;
+    uint32_t   pin;
+} GPIO_pin;
 
 /* GPIO_MODER possible values */
 #define GPIO_MODE_INPUT             (0x00000000U)
@@ -84,8 +90,9 @@ typedef struct  GPIO_config_s
 #define AF7                         0x7
 
 /* Note that to use GPIO you need to enable corresponding RCC */
-void    gpio_init(GPIO *GPIOx, GPIO_config *GPIO_init);
-void    gpio_select_alternate_function(GPIO *GPIOx, uint8_t pin, uint8_t function);
-void    gpio_set(GPIO *GPIOx, uint8_t pin, uint8_t value);
+void gpio_init(GPIO *GPIOx, GPIO_config *GPIO_init);
+void gpio_select_alternate_function(GPIO_pin gpio, uint8_t function);
+void gpio_set(GPIO_pin gpio, uint8_t value);
+int gpio_read(GPIO_pin gpio);
 
 #endif

@@ -10,21 +10,26 @@ void    gpio_init(GPIO *GPIOx, GPIO_config *GPIO_init)
     GPIOx->PUPDR = set_bits_with_offset(GPIOx->PUPDR, GPIO_init->pin * 2U, 2, GPIO_init->pull);
 }
 
-void    gpio_set(GPIO *GPIOx, uint8_t pin, uint8_t value)
+void    gpio_set(GPIO_pin gpio, uint8_t value)
 {
     if (value)
-        GPIOx->BSRR = 1 << pin;
+        gpio.port->BSRR = 1 << gpio.pin;
     else
-        GPIOx->BSRR = 1 << (pin + 16);
+        gpio.port->BSRR = 1 << (gpio.pin + 16);
 }
 
-void    gpio_select_alternate_function(GPIO *GPIOx, uint8_t pin, uint8_t function)
+int gpio_read(GPIO_pin gpio)
 {
-    const uint8_t offset = (pin % 8) * 4;
+    return ((gpio.port->IDR & (1 << gpio.pin)) > 0);
+}
 
-    if (pin <= 7)
-        GPIOx->AFRL = set_bits_with_offset(GPIOx->AFRL, offset, 4, function);
+void    gpio_select_alternate_function(GPIO_pin gpio, uint8_t function)
+{
+    const uint8_t offset = (gpio.pin % 8) * 4;
+
+    if (gpio.pin <= 7)
+        gpio.port->AFRL = set_bits_with_offset(gpio.port->AFRL, offset, 4, function);
     else
-        GPIOx->AFRH = set_bits_with_offset(GPIOx->AFRH, offset, 4, function);
-    GPIOx->MODER = set_bits_with_offset(GPIOx->MODER, pin * 2U, 2, GPIO_MODE_ALTERNATE_FUNC);
+        gpio.port->AFRH = set_bits_with_offset(gpio.port->AFRH, offset, 4, function);
+    gpio.port->MODER = set_bits_with_offset(gpio.port->MODER, gpio.pin * 2U, 2, GPIO_MODE_ALTERNATE_FUNC);
 }
